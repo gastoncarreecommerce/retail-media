@@ -537,6 +537,8 @@ tbody td.muted { color: var(--ink2); }
             <tr>
               <th onclick="sortTable('skuTable',0)">Item ID <span class="sort-icon">↕</span></th>
               <th onclick="sortTable('skuTable',1)">Nombre <span class="sort-icon">↕</span></th>
+              <th title="No disponible: el sitio no envía item_id en view_item_list">view_item_list ⓘ</th>
+              <th title="No disponible: el sitio no envía item_id en view_item">view_item ⓘ</th>
               <th onclick="sortTable('skuTable',2)">add_to_cart <span class="sort-icon">↕</span></th>
               <th onclick="sortTable('skuTable',3)" class="sorted">Qty vendida <span class="sort-icon">↓</span></th>
               <th onclick="sortTable('skuTable',4)">Revenue <span class="sort-icon">↕</span></th>
@@ -874,8 +876,8 @@ async function loadCategoryViews() {
     if (data._mock) el("mockBanner").style.display = "block";
 
     const rows = data.rows.slice(0, 12);
-    const labels = rows.map(r => r.itemListName);
-    const values = rows.map(r => r.itemListViews);
+    const labels = rows.map(r => r.itemCategory || r.itemListName);
+    const values = rows.map(r => r.itemsAddedToCart || r.itemListViews);
 
     hideLoading("catLoading");
     el("catChart").style.display = "block";
@@ -1076,6 +1078,8 @@ function renderSkuTable(rows) {
     <tr>
       <td class="muted">${r.itemId}</td>
       <td>${escapeHtml(r.itemName || "—")}</td>
+      <td class="muted" style="font-style:italic">N/D</td>
+      <td class="muted" style="font-style:italic">N/D</td>
       <td>${fmt.int(r.itemsAddedToCart)}</td>
       <td>${fmt.int(r.itemPurchaseQuantity)}</td>
       <td>${fmt.money(r.itemRevenue)}</td>
@@ -1092,6 +1096,8 @@ function renderSkuTable(rows) {
   tfoot.innerHTML = `
     <tr class="tfoot-row">
       <td colspan="2">Total (${rows.length} SKUs)</td>
+      <td>—</td>
+      <td>—</td>
       <td>${fmt.int(totals.itemsAddedToCart)}</td>
       <td>${fmt.int(totals.itemPurchaseQuantity)}</td>
       <td>${fmt.money(totals.itemRevenue)}</td>
