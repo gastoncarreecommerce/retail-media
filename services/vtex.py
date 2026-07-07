@@ -4,31 +4,33 @@ import os
 import httpx
 from typing import Optional
 
-_ACCOUNT = os.getenv("VTEX_ACCOUNT", "")
-_KEY = os.getenv("VTEX_APP_KEY", "")
-_TOKEN = os.getenv("VTEX_APP_TOKEN", "")
-_ENV = os.getenv("VTEX_ENVIRONMENT", "vtexcommercestable")
-_MOCK = not (_ACCOUNT and _KEY and _TOKEN)
+def _MOCK():
+    return not (os.getenv("VTEX_ACCOUNT") and os.getenv("VTEX_APP_KEY") and os.getenv("VTEX_APP_TOKEN"))
 
-_BASE = f"https://{_ACCOUNT}.{_ENV}.com.br" if _ACCOUNT else ""
-_HEADERS = {"X-VTEX-API-AppKey": _KEY, "X-VTEX-API-AppToken": _TOKEN}
+def _base():
+    account = os.getenv("VTEX_ACCOUNT", "")
+    env = os.getenv("VTEX_ENVIRONMENT", "vtexcommercestable")
+    return f"https://{account}.{env}.com.br"
+
+def _headers():
+    return {"X-VTEX-API-AppKey": os.getenv("VTEX_APP_KEY",""), "X-VTEX-API-AppToken": os.getenv("VTEX_APP_TOKEN","")}
 
 
 def search_skus(q: Optional[str] = None) -> dict:
     """Search SKUs by EAN or name. Falls back to listing first page."""
-    if _MOCK:
+    if _MOCK():
         return _mock_skus(q)
 
-    with httpx.Client(headers=_HEADERS, timeout=15) as client:
+    with httpx.Client(headers=_headers(), timeout=15) as client:
         # If query looks like an EAN (numeric), try EAN lookup first
         if q and q.strip().isdigit():
-            r = client.get(f"{_BASE}/api/catalog_system/pvt/sku/stockkeepingunitbyean/{q.strip()}")
+            r = client.get(f"{_base()}/api/catalog_system/pvt/sku/stockkeepingunitbyean/{q.strip()}")
             if r.status_code == 200:
                 sku = r.json()
                 return {"skus": [_normalize_sku(sku)]}
 
         # Otherwise search by name or return first page
-        url = f"{_BASE}/api/catalog_system/pvt/sku/stockkeepingunitids"
+        url = f"{_base()}/api/catalog_system/pvt/sku/stockkeepingunitids"
         params = {"page": 1, "pagesize": 50}
         r = client.get(url, params=params)
         r.raise_for_status()
@@ -38,7 +40,7 @@ def search_skus(q: Optional[str] = None) -> dict:
         skus = []
         for sku_id in sku_ids[:20]:
             detail = client.get(
-                f"{_BASE}/api/catalog_system/pvt/sku/stockkeepingunitbyid/{sku_id}"
+                f"{_base()}/api/catalog_system/pvt/sku/stockkeepingunitbyid/{sku_id}"
             )
             if detail.status_code == 200:
                 data = detail.json()
@@ -51,11 +53,11 @@ def search_skus(q: Optional[str] = None) -> dict:
 
 def get_sku_by_ean(ean: str) -> Optional[dict]:
     """Resolve a single EAN to SKU metadata."""
-    if _MOCK:
+    if _MOCK():
         return {"ean": ean, "id": f"SKU-{ean[-4:]}", "name": f"Producto EAN {ean}"}
 
-    with httpx.Client(headers=_HEADERS, timeout=10) as client:
-        r = client.get(f"{_BASE}/api/catalog_system/pvt/sku/stockkeepingunitbyean/{ean}")
+    with httpx.Client(headers=_headers(), timeout=10) as client:
+        r = client.get(f"{_base()}/api/catalog_system/pvt/sku/stockkeepingunitbyean/{ean}")
         if r.status_code == 200:
             return _normalize_sku(r.json())
     return None

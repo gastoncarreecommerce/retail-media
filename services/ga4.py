@@ -5,7 +5,8 @@ import random
 from datetime import datetime, timedelta
 from typing import Optional
 
-_MOCK = not (os.getenv("GA4_PROPERTY_ID") and os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+def _MOCK():
+    return not (os.getenv("GA4_PROPERTY_ID") and os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
 
 def _client():
@@ -63,7 +64,7 @@ def _in_list_filter(field: str, values: list):
 
 def get_overview(start: str, end: str) -> dict:
     """Active users + sessions grouped by date."""
-    if _MOCK:
+    if _MOCK():
         return _mock_overview(start, end)
 
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
@@ -85,7 +86,7 @@ def get_overview(start: str, end: str) -> dict:
 
 def get_source_medium(start: str, end: str) -> dict:
     """Session counts by source / medium."""
-    if _MOCK:
+    if _MOCK():
         return _mock_source_medium()
 
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
@@ -105,7 +106,7 @@ def get_source_medium(start: str, end: str) -> dict:
 
 def get_category_views(start: str, end: str) -> dict:
     """view_item_list counts by item list name (= category)."""
-    if _MOCK:
+    if _MOCK():
         return _mock_category_views()
 
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
@@ -128,7 +129,7 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
     if not eans:
         return {"rows": []}
 
-    if _MOCK:
+    if _MOCK():
         return _mock_sku_metrics(eans)
 
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy

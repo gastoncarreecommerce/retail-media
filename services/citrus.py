@@ -8,25 +8,24 @@ if your tenant has a custom base URL.
 import os
 import httpx
 
-_API_KEY = os.getenv("CITRUS_API_KEY", "")
-_CUSTOMER_ID = os.getenv("CITRUS_CUSTOMER_ID", "")
-_BASE = os.getenv("CITRUS_API_URL", "https://api.citrusad.com")
-_MOCK = not (_API_KEY and _CUSTOMER_ID)
+def _MOCK():
+    return not (os.getenv("CITRUS_API_KEY") and os.getenv("CITRUS_CUSTOMER_ID"))
 
-_HEADERS = {
-    "Authorization": f"ApiKey {_API_KEY}",
-    "Content-Type": "application/json",
-}
+def _headers():
+    return {"Authorization": f"ApiKey {os.getenv('CITRUS_API_KEY','')}", "Content-Type": "application/json"}
+
+def _base():
+    return os.getenv("CITRUS_API_URL", "https://api.citrusad.com")
 
 
 def get_banner_report(start: str, end: str) -> dict:
     """Retrieve banner impressions + clicks from CitrusAd."""
-    if _MOCK:
+    if _MOCK():
         return _mock_banners()
 
     # CitrusAd v1 reporting endpoint
     payload = {
-        "customerId": _CUSTOMER_ID,
+        "customerId": os.getenv("CITRUS_CUSTOMER_ID",""),
         "reportType": "banner",
         "startDate": _normalize_date(start),
         "endDate": _normalize_date(end),
@@ -34,8 +33,8 @@ def get_banner_report(start: str, end: str) -> dict:
         "metrics": ["impressions", "clicks"],
     }
 
-    with httpx.Client(headers=_HEADERS, timeout=30) as client:
-        r = client.post(f"{_BASE}/v1/analytics/report", json=payload)
+    with httpx.Client(headers=_headers(), timeout=30) as client:
+        r = client.post(f"{_base()}/v1/analytics/report", json=payload)
         r.raise_for_status()
         data = r.json()
 
