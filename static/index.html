@@ -1053,10 +1053,9 @@ function renderSkuTable(rows) {
   `).join("");
 
   const totals = rows.reduce((acc, r) => ({
-    itemViews: acc.itemViews + r.itemViews,
-    itemsAddedToCart: acc.itemsAddedToCart + r.itemsAddedToCart,
-    itemsPurchased: acc.itemsPurchased + r.itemsPurchased,
-    itemRevenue: acc.itemRevenue + r.itemRevenue,
+    itemsAddedToCart: acc.itemsAddedToCart + (r.itemsAddedToCart || 0),
+    itemPurchaseQuantity: acc.itemPurchaseQuantity + (r.itemPurchaseQuantity || 0),
+    itemRevenue: acc.itemRevenue + (r.itemRevenue || 0),
   }), {itemsAddedToCart:0, itemPurchaseQuantity:0, itemRevenue:0});
 
   tfoot.innerHTML = `

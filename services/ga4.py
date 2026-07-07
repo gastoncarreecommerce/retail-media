@@ -180,11 +180,27 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
         dimension_filter=_in_list_filter("itemId", eans),
         order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemRevenue"), desc=True)],
     ))
-    return {"rows": _rows_to_list(
+    rows = _rows_to_list(
         resp,
         ["itemId", "itemName"],
         ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"],
-    )}
+    )
+    # GA4 can return the same itemId with different itemNames (name changes over time).
+    # Aggregate by itemId, keeping the name with the highest revenue.
+    merged: dict[str, dict] = {}
+    for r in rows:
+        eid = r["itemId"]
+        if eid not in merged:
+            merged[eid] = dict(r)
+        else:
+            prev = merged[eid]
+            # Keep the name from the row with more revenue
+            if r["itemRevenue"] > prev["itemRevenue"]:
+                prev["itemName"] = r["itemName"]
+            prev["itemsAddedToCart"] += r["itemsAddedToCart"]
+            prev["itemPurchaseQuantity"] += r["itemPurchaseQuantity"]
+            prev["itemRevenue"] += r["itemRevenue"]
+    return {"rows": list(merged.values())}
 
 
 # ── mock data ────────────────────────────────────────────────────────────────
