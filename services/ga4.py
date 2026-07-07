@@ -119,27 +119,46 @@ def get_source_medium(start: str, end: str) -> dict:
 
 
 def get_category_views(start: str, end: str) -> dict:
-    """view_item_list counts by item list name (= category)."""
+    """Items added to cart by itemCategory — uses itemsAddedToCart which is
+    compatible with item dimensions in this property.
+    """
     if _MOCK():
         return _mock_category_views()
 
-    from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
+    from google.analytics.data_v1beta.types import RunReportRequest, OrderBy, FilterExpression, Filter
     client = _client()
     resp = client.run_report(
         RunReportRequest(
             property=_prop(),
             date_ranges=[_date_range(start, end)],
-            dimensions=[_dim("itemListName")],
-            metrics=[_metric("itemListViews")],
-            order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemListViews"), desc=True)],
-            limit=20,
+            dimensions=[_dim("itemCategory")],
+            metrics=[_metric("itemsAddedToCart"), _metric("itemsPurchased"), _metric("itemRevenue")],
+            dimension_filter=FilterExpression(
+                not_expression=FilterExpression(
+                    filter=Filter(
+                        field_name="itemCategory",
+                        string_filter=Filter.StringFilter(value="(not set)"),
+                    )
+                )
+            ),
+            order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemsAddedToCart"), desc=True)],
+            limit=15,
         )
     )
-    return {"rows": _rows_to_list(resp, ["itemListName"], ["itemListViews"])}
+    rows = _rows_to_list(resp, ["itemCategory"], ["itemsAddedToCart", "itemsPurchased", "itemRevenue"])
+    # alias for frontend chart compatibility
+    for r in rows:
+        r["itemListViews"] = r["itemsAddedToCart"]
+    return {"rows": rows}
 
 
 def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
-    """Item funnel metrics filtered by a list of EANs (itemId)."""
+    """Item funnel metrics filtered by a list of EANs (itemId).
+
+    GA4 API limitation: itemListViews (list-scoped) is NOT compatible with
+    itemId (item-scoped) in the same report — they are different event scopes.
+    We return item-scoped metrics only: itemViews, add_to_cart, purchase, revenue.
+    """
     if not eans:
         return {"rows": []}
 
@@ -148,26 +167,23 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
 
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
     client = _client()
-    resp = client.run_report(
-        RunReportRequest(
-            property=_prop(),
-            date_ranges=[_date_range(start, end)],
-            dimensions=[_dim("itemId"), _dim("itemName")],
-            metrics=[
-                _metric("itemListViews"),
-                _metric("itemViews"),
-                _metric("itemsAddedToCart"),
-                _metric("itemsPurchased"),
-                _metric("itemRevenue"),
-            ],
-            dimension_filter=_in_list_filter("itemId", eans),
-            order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemRevenue"), desc=True)],
-        )
-    )
+
+    resp = client.run_report(RunReportRequest(
+        property=_prop(),
+        date_ranges=[_date_range(start, end)],
+        dimensions=[_dim("itemId"), _dim("itemName")],
+        metrics=[
+            _metric("itemsAddedToCart"),
+            _metric("itemPurchaseQuantity"),
+            _metric("itemRevenue"),
+        ],
+        dimension_filter=_in_list_filter("itemId", eans),
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemRevenue"), desc=True)],
+    ))
     return {"rows": _rows_to_list(
         resp,
         ["itemId", "itemName"],
-        ["itemListViews", "itemViews", "itemsAddedToCart", "itemsPurchased", "itemRevenue"],
+        ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"],
     )}
 
 
