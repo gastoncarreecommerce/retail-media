@@ -399,69 +399,75 @@ tbody td.muted { color: var(--ink2); }
 </head>
 <body>
 
-<!-- ── Login overlay ──────────────────────────────────────────────────────── -->
-<div id="loginOverlay" style="
-  display:flex; position:fixed; inset:0; z-index:9999;
-  align-items:center; justify-content:center;
+<!-- ── Login page ─────────────────────────────────────────────────────────── -->
+<div id="loginPage" style="
+  display:flex; min-height:100vh; align-items:center; justify-content:center;
   background:var(--bg);
 ">
   <div style="
     background:var(--surface); border:1px solid var(--border);
-    border-radius:12px; padding:40px 48px; width:360px; max-width:90vw;
-    display:flex; flex-direction:column; gap:20px;
+    border-radius:14px; padding:44px 52px; width:380px; max-width:92vw;
+    display:flex; flex-direction:column; gap:22px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
   ">
-    <div style="text-align:center; margin-bottom:4px;">
-      <div style="font-size:2rem; margin-bottom:8px;">📊</div>
-      <div style="font-size:1.15rem; font-weight:700; color:var(--text);">Retail Media Dashboard</div>
+    <div style="text-align:center; margin-bottom:2px;">
+      <div style="font-size:2.2rem; margin-bottom:10px;">📊</div>
+      <div style="font-size:1.2rem; font-weight:700; color:var(--text); letter-spacing:-.01em;">Retail Media Dashboard</div>
+      <div style="font-size:.82rem; color:var(--muted); margin-top:4px;">Ingresá tus credenciales para continuar</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <label style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Usuario de Windows</label>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600;">Usuario de Windows</label>
       <input id="loginUser" type="text" autocomplete="username"
         style="
-          background:var(--bg); border:1px solid var(--border); border-radius:6px;
-          padding:9px 12px; color:var(--text); font-size:.92rem; outline:none;
-          transition:border-color .15s;
+          background:var(--bg); border:1px solid var(--border); border-radius:7px;
+          padding:10px 13px; color:var(--text); font-size:.93rem; outline:none;
+          width:100%; box-sizing:border-box;
         "
-        placeholder="usuario"
+        placeholder="tu.nombre"
       />
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <label style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Contraseña</label>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600;">Contraseña</label>
       <input id="loginPass" type="password" autocomplete="current-password"
         style="
-          background:var(--bg); border:1px solid var(--border); border-radius:6px;
-          padding:9px 12px; color:var(--text); font-size:.92rem; outline:none;
-          transition:border-color .15s;
+          background:var(--bg); border:1px solid var(--border); border-radius:7px;
+          padding:10px 13px; color:var(--text); font-size:.93rem; outline:none;
+          width:100%; box-sizing:border-box;
         "
         placeholder="••••••••••••"
       />
     </div>
-    <div id="loginError" style="display:none; color:#e05252; font-size:.82rem; text-align:center; margin-top:-8px;"></div>
+    <div id="loginError" style="display:none; color:#e05252; font-size:.82rem; text-align:center; margin-top:-10px;"></div>
     <button id="loginBtn" style="
-      background:var(--accent); color:#fff; border:none; border-radius:6px;
-      padding:11px; font-size:.95rem; font-weight:600; cursor:pointer;
-      transition:opacity .15s;
-    ">Ingresar</button>
+      background:var(--accent); color:#fff; border:none; border-radius:7px;
+      padding:12px; font-size:.96rem; font-weight:600; cursor:pointer;
+      transition:opacity .15s; width:100%;
+    " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Ingresar</button>
   </div>
 </div>
+
+<!-- ── Dashboard (hidden until login) ────────────────────────────────────── -->
+<div id="dashboard" style="display:none">
 
 <script>
 (function(){
   const PWD = "RetailMedia1234";
   const KEY = "rm_auth";
-  const overlay = document.getElementById("loginOverlay");
-  const passInput = document.getElementById("loginPass");
-  const errEl = document.getElementById("loginError");
 
-  function unlock() { overlay.style.display = "none"; }
+  function unlock() {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+  }
   function fail(msg) {
+    const errEl = document.getElementById("loginError");
     errEl.textContent = msg;
     errEl.style.display = "block";
-    passInput.value = "";
-    passInput.focus();
+    const pass = document.getElementById("loginPass");
+    pass.value = "";
+    pass.focus();
   }
   function attempt() {
-    if (passInput.value === PWD) {
+    if (document.getElementById("loginPass").value === PWD) {
       sessionStorage.setItem(KEY, "1");
       unlock();
     } else {
@@ -472,8 +478,8 @@ tbody td.muted { color: var(--ink2); }
   if (sessionStorage.getItem(KEY) === "1") { unlock(); return; }
 
   document.getElementById("loginBtn").addEventListener("click", attempt);
-  passInput.addEventListener("keydown", e => { if (e.key === "Enter") attempt(); });
-  document.getElementById("loginUser").addEventListener("keydown", e => { if (e.key === "Enter") passInput.focus(); });
+  document.getElementById("loginPass").addEventListener("keydown", e => { if (e.key === "Enter") attempt(); });
+  document.getElementById("loginUser").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("loginPass").focus(); });
 })();
 </script>
 
@@ -1223,5 +1229,7 @@ loadOverview();
 loadSourceMedium();
 loadCategoryViews();
 </script>
+
+</div><!-- /dashboard -->
 </body>
 </html>
