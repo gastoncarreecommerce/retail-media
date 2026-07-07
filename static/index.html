@@ -429,7 +429,6 @@ tbody td.muted { color: var(--ink2); }
 <nav class="tabs-bar">
   <button class="tab-btn active" data-tab="tab1">Audiencia</button>
   <button class="tab-btn" data-tab="tab2">SKUs / EANs</button>
-  <button class="tab-btn" data-tab="tab3">Banners Citrus</button>
 </nav>
 
 <!-- ════════════════════════════════════════════════════════════════════
@@ -553,38 +552,6 @@ tbody td.muted { color: var(--ink2); }
 
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════════
-     TAB 3: Banners Citrus
-═══════════════════════════════════════════════════════════════════════ -->
-<div id="tab3" class="tab-panel">
-
-  <div class="card">
-    <div class="card-body">
-      <div class="table-toolbar">
-        <h3>Performance de banners</h3>
-        <button class="btn-csv" onclick="exportCsv('citrusTable', 'citrus-banners')">⬇ Exportar CSV</button>
-      </div>
-      <div class="loading" id="citrusLoading"><div class="spinner"></div> Cargando…</div>
-      <div class="error-msg" id="citrusError" style="display:none"></div>
-      <div class="table-wrap" id="citrusTableWrap" style="display:none">
-        <table id="citrusTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable('citrusTable',0)">Banner ID <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('citrusTable',1)">Nombre <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('citrusTable',2)">Campaña <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('citrusTable',3)" class="sorted">Impresiones <span class="sort-icon">↓</span></th>
-              <th onclick="sortTable('citrusTable',4)">Clicks <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('citrusTable',5)">CTR % <span class="sort-icon">↕</span></th>
-            </tr>
-          </thead>
-          <tbody id="citrusTbody"></tbody>
-          <tfoot id="citrusTfoot"></tfoot>
-        </table>
-      </div>
-    </div>
-  </div>
-
 </div>
 </main>
 
@@ -680,7 +647,6 @@ function initTabs() {
       btn.classList.add("active");
       el(btn.dataset.tab).classList.add("active");
       // Load tab data lazily
-      if (btn.dataset.tab === "tab3" && !state.citrusLoaded) loadCitrus();
     });
   });
 }
@@ -1105,67 +1071,6 @@ function renderSkuTable(rows) {
   `;
 }
 
-// ── TAB 3: Citrus banners ─────────────────────────────────────────────────────
-state.citrusLoaded = false;
-
-async function loadCitrus() {
-  state.citrusLoaded = true;
-  el("citrusTableWrap").style.display = "none";
-  el("citrusError").style.display = "none";
-  showLoading("citrusLoading");
-
-  try {
-    const data = await apiFetch(`/api/citrus/banners?start=${state.start}&end=${state.end}`);
-    if (data._mock) el("mockBanner").style.display = "block";
-
-    renderCitrusTable(data.rows);
-    hideLoading("citrusLoading");
-    el("citrusTableWrap").style.display = "block";
-  } catch(e) {
-    hideLoading("citrusLoading");
-    el("citrusError").textContent = `Error: ${e.message}`;
-    el("citrusError").style.display = "flex";
-  }
-}
-
-function renderCitrusTable(rows) {
-  const tbody = el("citrusTbody");
-  const tfoot = el("citrusTfoot");
-  const maxCtr = Math.max(...rows.map(r => r.ctr), 1);
-
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td class="muted">${r.bannerId}</td>
-      <td>${escapeHtml(r.bannerName)}</td>
-      <td class="muted">${escapeHtml(r.campaignName)}</td>
-      <td>${fmt.int(r.impressions)}</td>
-      <td>${fmt.int(r.clicks)}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="ctr-bar-wrap">
-            <div class="ctr-bar-fill" style="width:${(r.ctr/maxCtr*100).toFixed(1)}%"></div>
-          </div>
-          <span>${fmt.pct(r.ctr)}</span>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-
-  const totals = rows.reduce((acc, r) => ({
-    impressions: acc.impressions + r.impressions,
-    clicks: acc.clicks + r.clicks,
-  }), {impressions:0, clicks:0});
-  const avgCtr = totals.impressions ? (totals.clicks / totals.impressions * 100) : 0;
-
-  tfoot.innerHTML = `
-    <tr class="tfoot-row">
-      <td colspan="3">Total (${rows.length} banners)</td>
-      <td>${fmt.int(totals.impressions)}</td>
-      <td>${fmt.int(totals.clicks)}</td>
-      <td>${fmt.pct(avgCtr)}</td>
-    </tr>
-  `;
-}
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
 function sortTable(tableId, colIdx) {
@@ -1223,8 +1128,6 @@ function refreshAll() {
     .finally(() => {
       btn.style.animation = "";
       btn.style.opacity = "";
-      // Reload citrus if its tab is visible
-      if (state.citrusLoaded) loadCitrus();
     });
 }
 
