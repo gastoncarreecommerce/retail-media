@@ -6,12 +6,26 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 def _MOCK():
-    return not (os.getenv("GA4_PROPERTY_ID") and os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+    return not (os.getenv("GA4_PROPERTY_ID") and (
+        os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+    ))
 
 
 def _client():
     from google.analytics.data_v1beta import BetaAnalyticsDataClient
-    return BetaAnalyticsDataClient()
+    import json
+
+    # Prefer inline JSON (Vercel / any PaaS) over file path
+    sa_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if sa_json:
+        from google.oauth2 import service_account
+        info = json.loads(sa_json)
+        creds = service_account.Credentials.from_service_account_info(
+            info, scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+        )
+        return BetaAnalyticsDataClient(credentials=creds)
+
+    return BetaAnalyticsDataClient()  # falls back to GOOGLE_APPLICATION_CREDENTIALS file
 
 
 def _prop():
