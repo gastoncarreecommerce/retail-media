@@ -173,6 +173,7 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
         date_ranges=[_date_range(start, end)],
         dimensions=[_dim("itemId"), _dim("itemName")],
         metrics=[
+            _metric("itemViews"),
             _metric("itemsAddedToCart"),
             _metric("itemPurchaseQuantity"),
             _metric("itemRevenue"),
@@ -183,7 +184,7 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
     rows = _rows_to_list(
         resp,
         ["itemId", "itemName"],
-        ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"],
+        ["itemViews", "itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"],
     )
     # GA4 can return the same itemId with different itemNames (name changes over time).
     # Aggregate by itemId, keeping the name with the highest revenue.
@@ -197,6 +198,7 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
             # Keep the name from the row with more revenue
             if r["itemRevenue"] > prev["itemRevenue"]:
                 prev["itemName"] = r["itemName"]
+            prev["itemViews"] += r["itemViews"]
             prev["itemsAddedToCart"] += r["itemsAddedToCart"]
             prev["itemPurchaseQuantity"] += r["itemPurchaseQuantity"]
             prev["itemRevenue"] += r["itemRevenue"]
@@ -260,18 +262,16 @@ def _mock_sku_metrics(eans: list[str]) -> dict:
     random.seed(99)
     rows = []
     for ean in eans:
-        views_list = random.randint(300, 5000)
-        views_item = int(views_list * random.uniform(0.3, 0.7))
+        views_item = random.randint(300, 5000)
         atc = int(views_item * random.uniform(0.1, 0.35))
         purchased = int(atc * random.uniform(0.3, 0.7))
         revenue = round(purchased * random.uniform(15.0, 250.0), 2)
         rows.append({
             "itemId": ean,
             "itemName": f"Producto EAN {ean}",
-            "itemListViews": views_list,
             "itemViews": views_item,
             "itemsAddedToCart": atc,
-            "itemsPurchased": purchased,
+            "itemPurchaseQuantity": purchased,
             "itemRevenue": revenue,
         })
     return {"rows": rows, "_mock": True}
