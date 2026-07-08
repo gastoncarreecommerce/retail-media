@@ -765,9 +765,10 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
             <tr>
               <th onclick="sortTable('skuTable',0)">Item ID <span class="sort-icon">↕</span></th>
               <th onclick="sortTable('skuTable',1)">Nombre <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('skuTable',2)">Add to Cart <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('skuTable',3)" class="sorted">Qty Vendida <span class="sort-icon">↓</span></th>
-              <th onclick="sortTable('skuTable',4)">Revenue <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('skuTable',2)">Artículos vistos <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('skuTable',3)">Add to Cart <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('skuTable',4)" class="sorted">Qty Vendida <span class="sort-icon">↓</span></th>
+              <th onclick="sortTable('skuTable',5)">Revenue <span class="sort-icon">↕</span></th>
             </tr>
           </thead>
           <tbody id="skuTbody"></tbody>
@@ -1259,6 +1260,7 @@ function renderSkuTable(rows) {
     <tr>
       <td class="muted">${r.itemId}</td>
       <td style="font-weight:500">${escapeHtml(r.itemName || "—")}</td>
+      <td>${fmt.int(r.itemViews)}</td>
       <td>${fmt.int(r.itemsAddedToCart)}</td>
       <td>${fmt.int(r.itemPurchaseQuantity)}</td>
       <td>${fmt.money(r.itemRevenue)}</td>
@@ -1270,11 +1272,12 @@ function renderSkuTable(rows) {
     itemsAddedToCart: acc.itemsAddedToCart + (r.itemsAddedToCart || 0),
     itemPurchaseQuantity: acc.itemPurchaseQuantity + (r.itemPurchaseQuantity || 0),
     itemRevenue: acc.itemRevenue + (r.itemRevenue || 0),
-  }), {itemsAddedToCart:0, itemPurchaseQuantity:0, itemRevenue:0});
+  }), {itemViews:0, itemsAddedToCart:0, itemPurchaseQuantity:0, itemRevenue:0});
 
   tfoot.innerHTML = `
     <tr class="tfoot-row">
       <td colspan="2">Total · ${rows.length} SKU${rows.length !== 1 ? "s" : ""}</td>
+      <td>${fmt.int(totals.itemViews)}</td>
       <td>${fmt.int(totals.itemsAddedToCart)}</td>
       <td>${fmt.int(totals.itemPurchaseQuantity)}</td>
       <td>${fmt.money(totals.itemRevenue)}</td>

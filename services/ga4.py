@@ -155,9 +155,8 @@ def get_category_views(start: str, end: str) -> dict:
 def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
     """Item funnel metrics filtered by a list of EANs (itemId).
 
-    GA4 API limitation: itemListViews (list-scoped) is NOT compatible with
-    itemId (item-scoped) in the same report — they are different event scopes.
-    We return item-scoped metrics only: itemViews, add_to_cart, purchase, revenue.
+    GA4 requires two separate requests because itemViews is not compatible
+    in the same report as itemsAddedToCart/itemRevenue. We merge by itemId.
     """
     if not eans:
         return {"rows": []}
@@ -168,7 +167,8 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
     from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
     client = _client()
 
-    resp = client.run_report(RunReportRequest(
+    # Request 1: purchase funnel metrics
+    resp1 = client.run_report(RunReportRequest(
         property=_prop(),
         date_ranges=[_date_range(start, end)],
         dimensions=[_dim("itemId"), _dim("itemName")],
@@ -180,23 +180,32 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
         dimension_filter=_in_list_filter("itemId", eans),
         order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemRevenue"), desc=True)],
     ))
-    rows = _rows_to_list(
-        resp,
-        ["itemId", "itemName"],
-        ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"],
-    )
-    # GA4 can return the same itemId with different itemNames (name changes over time).
-    # Aggregate by itemId, keeping the name with the highest revenue.
+    rows1 = _rows_to_list(resp1, ["itemId", "itemName"],
+                          ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"])
+
+    # Request 2: item views (separate request — different metric scope)
+    resp2 = client.run_report(RunReportRequest(
+        property=_prop(),
+        date_ranges=[_date_range(start, end)],
+        dimensions=[_dim("itemId")],
+        metrics=[_metric("itemViews")],
+        dimension_filter=_in_list_filter("itemId", eans),
+    ))
+    views_by_id = {r["itemId"]: r["itemViews"]
+                   for r in _rows_to_list(resp2, ["itemId"], ["itemViews"])}
+
+    # Merge and deduplicate by itemId
     merged: dict[str, dict] = {}
-    for r in rows:
+    for r in rows1:
         eid = r["itemId"]
         if eid not in merged:
             merged[eid] = dict(r)
+            merged[eid]["itemViews"] = views_by_id.get(eid, 0)
         else:
             prev = merged[eid]
-            # Keep the name from the row with more revenue
             if r["itemRevenue"] > prev["itemRevenue"]:
                 prev["itemName"] = r["itemName"]
+            prev["itemViews"] = views_by_id.get(eid, 0)
             prev["itemsAddedToCart"] += r["itemsAddedToCart"]
             prev["itemPurchaseQuantity"] += r["itemPurchaseQuantity"]
             prev["itemRevenue"] += r["itemRevenue"]
