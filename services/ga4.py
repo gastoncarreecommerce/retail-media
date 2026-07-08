@@ -183,29 +183,16 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
     rows1 = _rows_to_list(resp1, ["itemId", "itemName"],
                           ["itemsAddedToCart", "itemPurchaseQuantity", "itemRevenue"])
 
-    # Request 2: item views (separate request — different metric scope)
-    resp2 = client.run_report(RunReportRequest(
-        property=_prop(),
-        date_ranges=[_date_range(start, end)],
-        dimensions=[_dim("itemId")],
-        metrics=[_metric("itemViews")],
-        dimension_filter=_in_list_filter("itemId", eans),
-    ))
-    views_by_id = {r["itemId"]: r["itemViews"]
-                   for r in _rows_to_list(resp2, ["itemId"], ["itemViews"])}
-
     # Merge and deduplicate by itemId
     merged: dict[str, dict] = {}
     for r in rows1:
         eid = r["itemId"]
         if eid not in merged:
             merged[eid] = dict(r)
-            merged[eid]["itemViews"] = views_by_id.get(eid, 0)
         else:
             prev = merged[eid]
             if r["itemRevenue"] > prev["itemRevenue"]:
                 prev["itemName"] = r["itemName"]
-            prev["itemViews"] = views_by_id.get(eid, 0)
             prev["itemsAddedToCart"] += r["itemsAddedToCart"]
             prev["itemPurchaseQuantity"] += r["itemPurchaseQuantity"]
             prev["itemRevenue"] += r["itemRevenue"]
