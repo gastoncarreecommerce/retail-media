@@ -68,6 +68,18 @@ def sku_metrics(
         raise HTTPException(502, detail=str(e))
 
 
+@app.get("/api/ga4/sku-source-medium")
+def sku_source_medium(
+    eans: Annotated[list[str], Query()] = [],
+    start: Annotated[str, Query()] = "30daysAgo",
+    end: Annotated[str, Query()] = "today",
+):
+    try:
+        return ga4_svc.get_sku_source_medium(eans, start, end)
+    except Exception as e:
+        raise HTTPException(502, detail=str(e))
+
+
 # ── VTEX ──────────────────────────────────────────────────────────────────────
 
 @app.get("/api/vtex/skus")

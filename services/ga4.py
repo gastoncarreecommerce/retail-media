@@ -118,6 +118,34 @@ def get_source_medium(start: str, end: str) -> dict:
     return {"rows": _rows_to_list(resp, ["sessionSource", "sessionMedium"], ["sessions"])}
 
 
+def get_sku_source_medium(eans: list[str], start: str, end: str) -> dict:
+    """Session source/medium filtered by specific EANs (itemId).
+
+    Uses itemsAddedToCart (item-scoped) with session dimensions + itemId filter.
+    This tells you which channels drove add-to-cart for these specific products.
+    """
+    if not eans:
+        return {"rows": []}
+
+    if _MOCK():
+        return _mock_sku_source_medium(eans)
+
+    from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
+    client = _client()
+    resp = client.run_report(
+        RunReportRequest(
+            property=_prop(),
+            date_ranges=[_date_range(start, end)],
+            dimensions=[_dim("sessionSource"), _dim("sessionMedium")],
+            metrics=[_metric("itemsAddedToCart"), _metric("itemRevenue")],
+            dimension_filter=_in_list_filter("itemId", eans),
+            order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="itemsAddedToCart"), desc=True)],
+            limit=15,
+        )
+    )
+    return {"rows": _rows_to_list(resp, ["sessionSource", "sessionMedium"], ["itemsAddedToCart", "itemRevenue"])}
+
+
 def get_category_views(start: str, end: str) -> dict:
     """Items added to cart by itemCategory — uses itemsAddedToCart which is
     compatible with item dimensions in this property.
@@ -232,6 +260,25 @@ def _mock_source_medium() -> dict:
             {"sessionSource": "referral", "sessionMedium": "referral", "sessions": 710},
         ],
     }
+
+
+def _mock_sku_source_medium(eans: list[str]) -> dict:
+    import random
+    random.seed(len(eans) * 7)
+    base = [
+        {"sessionSource": "google",    "sessionMedium": "cpc",      "itemsAddedToCart": 0, "itemRevenue": 0},
+        {"sessionSource": "google",    "sessionMedium": "organic",  "itemsAddedToCart": 0, "itemRevenue": 0},
+        {"sessionSource": "(direct)",  "sessionMedium": "(none)",   "itemsAddedToCart": 0, "itemRevenue": 0},
+        {"sessionSource": "instagram", "sessionMedium": "social",   "itemsAddedToCart": 0, "itemRevenue": 0},
+        {"sessionSource": "email",     "sessionMedium": "email",    "itemsAddedToCart": 0, "itemRevenue": 0},
+        {"sessionSource": "facebook",  "sessionMedium": "cpc",      "itemsAddedToCart": 0, "itemRevenue": 0},
+    ]
+    for row in base:
+        atc = random.randint(20, 900)
+        row["itemsAddedToCart"] = atc
+        row["itemRevenue"] = round(atc * random.uniform(0.3, 0.7) * random.uniform(15, 200), 2)
+    base.sort(key=lambda r: r["itemsAddedToCart"], reverse=True)
+    return {"rows": base, "_mock": True}
 
 
 def _mock_category_views() -> dict:

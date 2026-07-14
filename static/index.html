@@ -1072,14 +1072,18 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">Sesiones por fuente / medio</div>
-            <div class="card-sub">Top 10 canales de adquisición de tráfico</div>
+            <div class="card-title">Fuente / medio — por EAN seleccionado</div>
+            <div class="card-sub" id="smSubtitle">Add-to-carts por canal para los EANs consultados</div>
           </div>
         </div>
         <div class="card-body">
           <div class="chart-wrap" style="height:340px">
-            <div class="loading" id="smLoading"><div class="spinner"></div> Cargando…</div>
+            <div class="loading" id="smLoading" style="display:none"><div class="spinner"></div> Cargando…</div>
             <canvas id="smChart" style="display:none"></canvas>
+            <div class="empty-state" id="smEmpty">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
+              <p>Consultá uno o más EANs para ver las fuentes de tráfico asociadas.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1366,21 +1370,35 @@ async function loadOverview() {
   }
 }
 
-async function loadSourceMedium() {
-  showLoading("smLoading");
+async function loadSkuSourceMedium() {
+  if (!state.eans.length) return;
+
+  el("smEmpty").style.display = "none";
   el("smChart").style.display = "none";
+  showLoading("smLoading");
+
   try {
-    const data = await apiFetch(`/api/ga4/source-medium?start=${state.start}&end=${state.end}`);
+    const params = new URLSearchParams();
+    state.eans.forEach(e => params.append("eans", e.ean));
+    params.set("start", state.start);
+    params.set("end", state.end);
+
+    const data = await apiFetch(`/api/ga4/sku-source-medium?${params}`);
     if (data._mock) el("mockBanner").style.display = "block";
 
     const rows   = data.rows.slice(0, 10);
     const labels = rows.map(r => `${r.sessionSource} / ${r.sessionMedium}`);
-    const values = rows.map(r => r.sessions);
+    const values = rows.map(r => r.itemsAddedToCart);
     const max    = Math.max(...values);
 
     hideLoading("smLoading");
     el("smChart").style.display = "block";
     destroyChart("sm");
+
+    const subtitle = state.eans.length === 1
+      ? `EAN ${state.eans[0].ean} · ${state.eans[0].name}`
+      : `${state.eans.length} EANs seleccionados`;
+    el("smSubtitle").textContent = `Add-to-carts por canal · ${subtitle}`;
 
     state.charts.sm = new Chart(el("smChart"), {
       type: "bar",
@@ -1416,7 +1434,7 @@ async function loadSourceMedium() {
     });
 
     setupCustomTooltip(state.charts.sm, (label, val) =>
-      `<strong style="color:var(--ink)">${label}</strong><br>Sesiones: <strong>${fmt.int(val)}</strong>`);
+      `<strong style="color:var(--ink)">${label}</strong><br>Add to Cart: <strong>${fmt.int(val)}</strong>`);
 
   } catch(e) {
     hideLoading("smLoading");
@@ -1569,6 +1587,11 @@ function clearEans() {
   renderEanChips();
   el("skuTableWrap").style.display = "none";
   el("skuEmpty").style.display = "block";
+  destroyChart("sm");
+  el("smChart").style.display = "none";
+  el("smLoading").style.display = "none";
+  el("smEmpty").style.display = "block";
+  el("smSubtitle").textContent = "Add-to-carts por canal para los EANs consultados";
 }
 
 function renderEanChips() {
@@ -1604,6 +1627,7 @@ async function runSkuReport() {
     renderSkuTable(data.rows);
     el("skuLoading").style.display = "none";
     el("skuTableWrap").style.display = "block";
+    loadSkuSourceMedium();
   } catch(e) {
     el("skuLoading").style.display = "none";
     el("skuError").textContent = `Error: ${e.message}`;
@@ -1697,9 +1721,9 @@ function refreshAll() {
   const btn = el("refreshBtn");
   btn.style.animation = "spin .5s linear infinite";
   btn.style.opacity = ".5";
-  const tasks = [loadOverview(), loadSourceMedium(), loadCategoryViews()];
+  const tasks = [loadOverview(), loadCategoryViews()];
   if (state.eans.length && el("skuTableWrap").style.display !== "none") {
-    tasks.push(runSkuReport());
+    tasks.push(runSkuReport()); // runSkuReport ya llama a loadSkuSourceMedium al terminar
   }
   Promise.all(tasks).finally(() => {
     btn.style.animation = "";
@@ -1717,7 +1741,6 @@ initDateChips();
 initTabs();
 initEanAutocomplete();
 loadOverview();
-loadSourceMedium();
 loadCategoryViews();
 </script>
 
