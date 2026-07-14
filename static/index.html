@@ -4,32 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carrefour Argentina · eCommerce Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
-/* ── Design tokens ──────────────────────────────────────────────────────── */
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
 :root {
-  --accent:       #0072CE;
-  --accent-dim:   #004A93;
-  --accent-glow:  rgba(0,114,206,.18);
-  --red:          #E2001A;
+  --cfr-blue: #0057C8;
+  --cfr-red:  #E2001A;
 
-  --bg:           #f4f6f9;
-  --surface:      #ffffff;
-  --surface2:     #f9fafb;
-  --card:         #ffffff;
-  --sidebar:      #001f5b;
-  --sidebar-text: rgba(255,255,255,.72);
-  --sidebar-act:  rgba(255,255,255,.12);
+  --accent:        #3d7ff5;
+  --accent-dim:    #1a5fd4;
+  --accent-vivid:  #5b9cff;
+  --accent-glow:   rgba(61,127,245,.18);
+  --green:  #10b981;
+  --purple: #8b5cf6;
+  --orange: #f59e0b;
+  --red:    #ef4444;
 
-  --ink:          #0d1117;
-  --ink2:         #4a5568;
-  --muted:        #8a94a6;
-  --grid:         #e8ecf1;
-  --baseline:     #d1d8e0;
-  --border:       rgba(13,17,23,.09);
+  --bg:        #f0f5ff;
+  --surface:   #ffffff;
+  --surface2:  #f6f9ff;
+  --card:      #ffffff;
+  --sidebar-bg:#0c1445;
+  --sidebar-w: 230px;
 
-  --s1: #0072CE;
-  --s2: #00a878;
+  --ink:   #0f172a;
+  --ink2:  #475569;
+  --muted: #94a3b8;
+  --border: rgba(15,23,42,.09);
+  --grid:   #dde6f5;
+
+  --s1: #3d7ff5;
+  --s2: #10b981;
   --s3: #f59e0b;
   --s4: #8b5cf6;
   --s5: #ef4444;
@@ -37,143 +45,204 @@
   --s7: #14b8a6;
   --s8: #f97316;
 
-  --good:  #059669;
-  --warn:  #d97706;
+  --radius:    12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
 
-  --radius:  10px;
-  --radius-lg: 16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
-  --shadow:    0 4px 12px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.05);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,.14);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow:      0 4px 20px rgba(0,0,0,.08);
+  --shadow-lg:   0 20px 60px rgba(0,0,0,.14);
+  --shadow-card: 0 2px 8px rgba(0,0,0,.06), 0 0 0 1px var(--border);
 }
 
 [data-theme="dark"] {
-  --bg:        #0e1117;
-  --surface:   #161b27;
-  --surface2:  #1c2236;
-  --card:      #1a2035;
-  --sidebar:   #0d1424;
+  --bg:        #060d1f;
+  --surface:   #0c1630;
+  --surface2:  #101c38;
+  --card:      #0e1b35;
+  --sidebar-bg:#040b1a;
 
-  --ink:       #e8edf5;
-  --ink2:      #9baec8;
-  --muted:     #5a6a87;
-  --grid:      #1f2a42;
-  --baseline:  #2a3652;
-  --border:    rgba(255,255,255,.07);
+  --ink:   #e2e8f5;
+  --ink2:  #8fa0bf;
+  --muted: #3f526e;
+  --border: rgba(255,255,255,.065);
+  --grid:   #162039;
 
-  --accent:       #3d90e8;
-  --accent-dim:   #1a6cc7;
-  --accent-glow:  rgba(61,144,232,.15);
+  --accent:      #4f8ef7;
+  --accent-dim:  #2563eb;
+  --accent-vivid:#7eb1ff;
+  --accent-glow: rgba(79,142,247,.2);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
-  --shadow:    0 4px 16px rgba(0,0,0,.35);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,.5);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.35);
+  --shadow:      0 4px 20px rgba(0,0,0,.5);
+  --shadow-lg:   0 24px 64px rgba(0,0,0,.7);
+  --shadow-card: 0 2px 8px rgba(0,0,0,.4), 0 0 0 1px var(--border);
 }
 
-/* ── Reset ────────────────────────────────────────────────────────────── */
+/* ── Reset ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--ink);
   font-size: 14px;
   line-height: 1.55;
-  transition: background .25s, color .25s;
+  -webkit-font-smoothing: antialiased;
 }
 button { cursor: pointer; font: inherit; }
-input, button { font-family: inherit; }
+input, button, select { font-family: inherit; }
+a { text-decoration: none; }
 
-/* ── LOGIN PAGE ───────────────────────────────────────────────────────── */
-#loginPage {
-  min-height: 100vh;
-  display: flex;
-  align-items: stretch;
-  background: #001f5b;
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes pulse   { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+@keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+@keyframes blobA {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(40px,-30px) scale(1.1); }
+  66%  { transform: translate(-20px,20px) scale(0.95); }
+}
+@keyframes blobB {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(-50px,30px) scale(1.08); }
+  66%  { transform: translate(30px,-40px) scale(0.92); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LOGIN PAGE
+══════════════════════════════════════════════════════════════════════════ */
+#loginPage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #050d22;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* animated gradient blobs */
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .55;
+  pointer-events: none;
+}
+.login-blob-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #0057c8 0%, transparent 70%);
+  top: -150px; left: -100px;
+  animation: blobA 18s ease-in-out infinite;
+}
+.login-blob-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #E2001A 0%, transparent 70%);
+  bottom: -100px; right: -80px;
+  opacity: .28;
+  animation: blobB 22s ease-in-out infinite;
+}
+.login-blob-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  top: 40%; left: 60%;
+  opacity: .2;
+  animation: blobA 26s ease-in-out infinite reverse;
+}
+
+/* grid overlay */
+.login-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* the glass card */
+.login-card {
+  position: relative; z-index: 2;
+  display: flex;
+  width: min(900px, 95vw);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 32px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08);
+}
+
+/* left panel */
 .login-left {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 64px 72px;
-  background: linear-gradient(145deg, #001f5b 0%, #003d99 55%, #0057c7 100%);
-  position: relative;
-  overflow: hidden;
+  padding: 60px 56px;
+  background: linear-gradient(145deg, rgba(0,57,140,.85) 0%, rgba(0,87,200,.7) 100%);
+  backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255,255,255,.08);
+  display: flex; flex-direction: column; justify-content: space-between;
 }
-.login-left::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(0,114,206,.35) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 60% at 80% 20%, rgba(226,0,26,.15) 0%, transparent 60%);
-}
-.login-left-inner { position: relative; z-index: 1; max-width: 480px; }
 .login-brand {
-  display: flex; align-items: center; gap: 14px; margin-bottom: 56px;
+  display: flex; align-items: center; gap: 14px; margin-bottom: 52px;
 }
 .login-brand-icon {
-  width: 52px; height: 52px; border-radius: 14px;
-  background: rgba(255,255,255,.15);
+  width: 50px; height: 50px; border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px;
-  border: 1px solid rgba(255,255,255,.2);
+  font-size: 24px;
   backdrop-filter: blur(8px);
 }
-.login-brand-name {
-  line-height: 1.2;
-}
 .login-brand-name strong {
-  display: block; font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -.3px;
+  display: block; font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -.3px;
 }
 .login-brand-name span {
-  font-size: 13px; color: rgba(255,255,255,.6); font-weight: 400;
+  font-size: 12px; color: rgba(255,255,255,.55); font-weight: 400;
 }
 .login-headline {
-  font-size: 38px; font-weight: 800; color: #fff;
-  line-height: 1.15; letter-spacing: -.8px; margin-bottom: 20px;
+  font-size: 40px; font-weight: 900; color: #fff;
+  line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 20px;
 }
-.login-headline em { font-style: normal; color: #70b8ff; }
-.login-sub {
-  font-size: 16px; color: rgba(255,255,255,.65); line-height: 1.6; max-width: 380px;
-}
-.login-dots {
-  display: flex; gap: 8px; margin-top: 52px;
-}
-.login-dots span {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: rgba(255,255,255,.25);
-}
-.login-dots span:first-child { background: #fff; width: 24px; border-radius: 4px; }
+.login-headline em { font-style: normal; color: #80c4ff; }
+.login-sub { font-size: 15px; color: rgba(255,255,255,.6); line-height: 1.65; }
 
-.login-right {
-  width: 480px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg);
-  padding: 48px 56px;
+.login-stats {
+  display: flex; gap: 32px; margin-top: 52px;
 }
-.login-form-wrap {
-  width: 100%; max-width: 360px;
+.login-stat-val {
+  font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -.5px;
+}
+.login-stat-lbl {
+  font-size: 11px; color: rgba(255,255,255,.45); font-weight: 500; margin-top: 2px;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+
+/* right panel (form) */
+.login-right {
+  width: 380px; flex-shrink: 0;
+  background: var(--surface);
+  padding: 52px 44px;
+  display: flex; flex-direction: column; justify-content: center;
 }
 .login-form-title {
-  font-size: 22px; font-weight: 700; color: var(--ink);
-  letter-spacing: -.4px; margin-bottom: 6px;
+  font-size: 24px; font-weight: 800; color: var(--ink);
+  letter-spacing: -.5px; margin-bottom: 6px;
 }
-.login-form-sub {
-  font-size: 13px; color: var(--muted); margin-bottom: 36px;
-}
-.login-field { margin-bottom: 20px; }
+.login-form-sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+
+.login-field { margin-bottom: 18px; }
 .login-label {
-  display: block; font-size: 12px; font-weight: 600;
-  color: var(--ink2); letter-spacing: .06em; text-transform: uppercase;
-  margin-bottom: 8px;
+  display: block; font-size: 11.5px; font-weight: 600; color: var(--ink2);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 7px;
 }
 .login-input {
   width: 100%; padding: 12px 16px;
-  background: var(--surface);
-  border: 1.5px solid var(--baseline);
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   color: var(--ink); font-size: 14px;
   outline: none; transition: border-color .2s, box-shadow .2s;
@@ -181,299 +250,437 @@ input, button { font-family: inherit; }
 .login-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--surface);
 }
 #loginError {
   display: none;
-  background: rgba(226,0,26,.1);
-  border: 1px solid rgba(226,0,26,.25);
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.25);
   border-radius: var(--radius);
-  color: #c00;
-  font-size: 13px; text-align: center;
+  color: #dc2626; font-size: 13px; text-align: center;
   padding: 10px 14px; margin-bottom: 16px;
 }
-[data-theme="dark"] #loginError { color: #ff7070; }
+[data-theme="dark"] #loginError { color: #f87171; }
+
 .login-btn {
   width: 100%; padding: 14px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
   color: #fff; border: none; border-radius: var(--radius);
-  font-size: 15px; font-weight: 600; letter-spacing: .01em;
-  transition: opacity .18s, transform .12s;
-  box-shadow: 0 4px 14px rgba(0,114,206,.35);
+  font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  transition: opacity .18s, transform .12s, box-shadow .18s;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  position: relative; overflow: hidden;
 }
-.login-btn:hover { opacity: .92; transform: translateY(-1px); }
+.login-btn::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, transparent 60%);
+  opacity: 0; transition: opacity .2s;
+}
+.login-btn:hover { opacity: .93; transform: translateY(-1px); box-shadow: 0 8px 28px var(--accent-glow); }
+.login-btn:hover::after { opacity: 1; }
 .login-btn:active { transform: translateY(0); }
 
-@media (max-width: 780px) {
+@media (max-width: 700px) {
   .login-left { display: none; }
-  .login-right { width: 100%; padding: 40px 24px; }
+  .login-right { width: 100%; }
 }
 
-/* ── LAYOUT SHELL ────────────────────────────────────────────────────── */
-#dashboard { display: none; min-height: 100vh; }
-
-/* ── HEADER ──────────────────────────────────────────────────────────── */
-.header {
-  position: sticky; top: 0; z-index: 200;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  display: flex; align-items: center;
-  padding: 0 28px; gap: 12px;
-  height: 60px;
+/* ══════════════════════════════════════════════════════════════════════════
+   DASHBOARD SHELL
+══════════════════════════════════════════════════════════════════════════ */
+#dashboard {
+  display: none;
+  min-height: 100vh;
 }
-.header-brand {
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────────────────── */
+.sidebar {
+  grid-row: 1 / -1;
+  background: var(--sidebar-bg);
+  border-right: 1px solid rgba(255,255,255,.05);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.sidebar-logo-row {
   display: flex; align-items: center; gap: 12px;
-  flex-shrink: 0; text-decoration: none;
 }
-.header-brand-badge {
-  width: 36px; height: 36px; border-radius: 9px;
-  background: linear-gradient(135deg, #0057c7, #004A93);
+.sidebar-logo-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: linear-gradient(135deg, #0057C8, #003d8a);
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px;
-  box-shadow: 0 2px 8px rgba(0,74,147,.3);
+  font-size: 20px; flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,87,200,.4);
 }
-.header-brand-text { line-height: 1.15; }
-.header-brand-main {
-  font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -.2px;
-  white-space: nowrap;
+.sidebar-logo-text strong {
+  display: block; font-size: 14px; font-weight: 800;
+  color: #fff; letter-spacing: -.3px;
 }
-.header-brand-sub {
-  font-size: 11px; color: var(--muted); letter-spacing: .02em; text-transform: uppercase;
+.sidebar-logo-text span {
+  font-size: 11px; color: rgba(255,255,255,.4);
+  font-weight: 400;
 }
-.header-sep {
-  width: 1px; height: 28px; background: var(--border); margin: 0 8px; flex-shrink: 0;
-}
-.header-greeting {
-  font-size: 13.5px; color: var(--ink2); white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-}
-.header-greeting strong { color: var(--ink); font-weight: 600; }
-.header-spacer { flex: 1; }
 
-/* Date chips */
-.date-chips { display: flex; gap: 4px; align-items: center; }
-.chip {
-  padding: 5px 13px; border-radius: 20px;
-  border: 1.5px solid var(--baseline);
-  background: transparent; color: var(--ink2);
-  font-size: 12.5px; font-weight: 500;
+.sidebar-section-lbl {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.25);
+  text-transform: uppercase; letter-spacing: .1em;
+  padding: 20px 20px 8px;
+}
+
+.sidebar-nav { flex: 1; padding: 4px 10px; }
+
+/* these are the .tab-btn elements — same class for JS compatibility */
+.tab-btn {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; padding: 11px 12px;
+  border: none; border-radius: 10px;
+  background: transparent; color: rgba(255,255,255,.45);
+  font-size: 13.5px; font-weight: 500;
+  transition: all .15s; text-align: left;
+  margin-bottom: 3px;
+  position: relative;
+}
+.tab-btn .nav-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+  background: rgba(255,255,255,.06);
   transition: all .15s;
+}
+.tab-btn:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.06); }
+.tab-btn.active {
+  color: #fff; background: rgba(79,142,247,.18);
+}
+.tab-btn.active .nav-icon {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+.tab-btn.active::before {
+  content: "";
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: var(--accent);
+}
+
+.sidebar-bottom {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sidebar-user-info { min-width: 0; }
+.sidebar-user-name {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sidebar-user-role {
+  font-size: 11px; color: rgba(255,255,255,.35);
+}
+.sidebar-logout {
+  margin-left: auto; flex-shrink: 0;
+  background: none; border: none;
+  color: rgba(255,255,255,.3); font-size: 17px;
+  transition: color .15s; padding: 4px;
+}
+.sidebar-logout:hover { color: var(--red); }
+
+/* ── TOPBAR ──────────────────────────────────────────────────────────────── */
+.topbar {
+  grid-column: 2;
+  position: sticky; top: 0; z-index: 200;
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 10px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--border);
+}
+.topbar-greeting {
+  font-size: 14px; color: var(--ink2); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.topbar-greeting strong { color: var(--ink); font-weight: 700; }
+.topbar-spacer { flex: 1; }
+
+/* date chips */
+.date-chips { display: flex; gap: 3px; align-items: center; flex-wrap: nowrap; }
+.chip {
+  padding: 5px 14px; border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: transparent; color: var(--ink2);
+  font-size: 12px; font-weight: 600;
+  transition: all .15s; white-space: nowrap;
 }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.active {
   background: var(--accent); border-color: var(--accent);
-  color: #fff; font-weight: 600;
-  box-shadow: 0 2px 8px var(--accent-glow);
+  color: #fff;
+  box-shadow: 0 2px 10px var(--accent-glow);
 }
-.custom-dates { display: none; align-items: center; gap: 6px; margin-left: 4px; }
+
+.custom-dates { display: none; align-items: center; gap: 6px; }
 .custom-dates.visible { display: flex; }
 .date-input {
-  padding: 5px 10px; border: 1.5px solid var(--baseline); border-radius: var(--radius);
-  background: var(--surface); color: var(--ink); font-size: 13px;
+  padding: 5px 10px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--surface2); color: var(--ink); font-size: 12.5px;
+  outline: none; transition: border-color .15s;
 }
+.date-input:focus { border-color: var(--accent); }
 .btn-apply {
-  padding: 5px 12px; border-radius: var(--radius); border: none;
-  background: var(--accent); color: #fff; font-size: 13px; font-weight: 500;
+  padding: 5px 13px; border-radius: var(--radius); border: none;
+  background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 600;
 }
 
 .icon-btn {
-  width: 34px; height: 34px; border-radius: var(--radius);
+  width: 36px; height: 36px; border-radius: 10px;
   border: 1.5px solid var(--border); background: transparent;
   color: var(--ink2); display: flex; align-items: center; justify-content: center;
-  font-size: 15px; transition: all .15s;
+  font-size: 16px; transition: all .15s; flex-shrink: 0;
 }
-.icon-btn:hover { background: var(--grid); color: var(--ink); border-color: var(--baseline); }
+.icon-btn:hover { background: var(--surface2); color: var(--ink); border-color: var(--muted); }
 
-/* ── MOCK BADGE ─────────────────────────────────────────────────────── */
+/* ── MOCK BANNER ─────────────────────────────────────────────────────────── */
 .mock-banner {
-  background: linear-gradient(90deg, #fef3c7, #fef9e7);
-  border-bottom: 1px solid #fcd34d;
-  color: #92400e; font-size: 12px; font-weight: 500;
-  padding: 7px 28px; text-align: center; display: none;
+  grid-column: 2;
+  background: linear-gradient(90deg, rgba(245,158,11,.12), rgba(251,191,36,.08));
+  border-bottom: 1px solid rgba(245,158,11,.2);
+  color: #b45309; font-size: 12px; font-weight: 500;
+  padding: 8px 28px; text-align: center; display: none;
+  letter-spacing: .01em;
 }
-[data-theme="dark"] .mock-banner {
-  background: linear-gradient(90deg, #1e1505, #231a06);
-  border-color: #3d2c00; color: #fbbf24;
+[data-theme="dark"] .mock-banner { color: #fbbf24; border-color: rgba(245,158,11,.15); }
+
+/* ── MAIN CONTENT ────────────────────────────────────────────────────────── */
+.main-content {
+  grid-column: 2;
+  padding: 28px;
+  max-width: 1380px;
+  width: 100%;
 }
 
-/* ── TAB NAV ────────────────────────────────────────────────────────── */
-.tabs-bar {
-  background: var(--card); border-bottom: 1px solid var(--border);
-  padding: 0 28px; display: flex; gap: 0;
-}
-.tab-btn {
-  padding: 14px 22px; border: none; background: transparent;
-  color: var(--muted); font-size: 13.5px; font-weight: 500;
-  position: relative; transition: color .15s; letter-spacing: -.01em;
-  display: flex; align-items: center; gap: 7px;
-}
-.tab-btn:hover { color: var(--ink2); }
-.tab-btn.active { color: var(--accent); font-weight: 600; }
-.tab-btn.active::after {
-  content: ""; position: absolute;
-  bottom: 0; left: 0; right: 0; height: 2.5px;
-  background: var(--accent); border-radius: 2px 2px 0 0;
-}
-
-/* ── CONTENT ────────────────────────────────────────────────────────── */
-.content { padding: 28px 28px 48px; max-width: 1440px; margin: 0 auto; }
-.tab-panel { display: none; }
+.tab-panel { display: none; animation: fadeUp .3s ease; }
 .tab-panel.active { display: block; }
-.section-gap { margin-bottom: 20px; }
 
-/* Grid helpers */
-.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.grid-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-@media (max-width: 960px) {
-  .grid-2, .grid-3, .grid-2-1 { grid-template-columns: 1fr; }
+/* ── SECTION TITLE ───────────────────────────────────────────────────────── */
+.section-title {
+  font-size: 20px; font-weight: 800; color: var(--ink);
+  letter-spacing: -.4px; margin-bottom: 6px;
+}
+.section-sub {
+  font-size: 13px; color: var(--muted); margin-bottom: 24px;
 }
 
-/* ── CARD ───────────────────────────────────────────────────────────── */
+/* ── KPI CARDS ───────────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 20px;
+}
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+.kpi-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  position: relative; overflow: hidden;
+  transition: box-shadow .2s, transform .2s;
+}
+.kpi-card:hover { box-shadow: var(--shadow), 0 0 0 1px var(--border); transform: translateY(-2px); }
+
+/* top accent line */
+.kpi-card::after {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--kpi-color, var(--accent)), transparent);
+}
+.kpi-card:nth-child(1) { --kpi-color: var(--accent); }
+.kpi-card:nth-child(2) { --kpi-color: var(--green); }
+.kpi-card:nth-child(3) { --kpi-color: var(--purple); }
+
+/* decorative circle */
+.kpi-card::before {
+  content: "";
+  position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, var(--kpi-color, var(--accent)) 0%, transparent 70%);
+  opacity: .08;
+}
+
+.kpi-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.kpi-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  background: linear-gradient(135deg, var(--kpi-color, var(--accent)) 0%, color-mix(in srgb, var(--kpi-color, var(--accent)) 60%, #000) 100%);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--kpi-color, var(--accent)) 40%, transparent);
+  flex-shrink: 0;
+}
+.kpi-badge {
+  font-size: 11px; font-weight: 600; padding: 3px 8px;
+  border-radius: 100px; background: rgba(16,185,129,.1); color: var(--green);
+}
+.kpi-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 34px; font-weight: 900; color: var(--ink);
+  letter-spacing: -1px; line-height: 1;
+  animation: countUp .4s ease;
+}
+.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ── CARD ────────────────────────────────────────────────────────────────── */
 .card {
-  background: var(--card); border-radius: var(--radius-lg);
-  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 .card-header {
-  padding: 18px 22px 0;
+  padding: 20px 24px 0;
   display: flex; align-items: center; justify-content: space-between;
 }
 .card-title {
-  font-size: 12px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .07em;
+  font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -.2px;
 }
-.card-body { padding: 16px 22px 22px; }
+.card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.card-body { padding: 16px 24px 24px; }
 
-/* ── KPI TILES ──────────────────────────────────────────────────────── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px; margin-bottom: 20px;
-}
-.kpi-card {
-  background: var(--card); border-radius: var(--radius-lg);
-  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-  padding: 22px 24px; position: relative; overflow: hidden;
-  transition: box-shadow .2s, transform .2s;
-}
-.kpi-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
-.kpi-card::before {
-  content: ""; position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: var(--accent); border-radius: 0 0 0 var(--radius-lg);
-}
-.kpi-card:nth-child(2)::before { background: var(--s2); }
-.kpi-card:nth-child(3)::before { background: var(--s4); }
-.kpi-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--accent-glow); display: flex; align-items: center; justify-content: center;
-  font-size: 18px; margin-bottom: 14px;
-}
-.kpi-card:nth-child(2) .kpi-icon { background: rgba(0,168,120,.12); }
-.kpi-card:nth-child(3) .kpi-icon { background: rgba(139,92,246,.12); }
-.kpi-label {
-  font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px;
-}
-.kpi-value {
-  font-size: 30px; font-weight: 800; color: var(--ink);
-  letter-spacing: -.8px; line-height: 1.1;
-}
-.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
-
-/* ── CHART CONTAINERS ───────────────────────────────────────────────── */
+/* ── CHART CONTAINER ─────────────────────────────────────────────────────── */
 .chart-wrap { position: relative; width: 100%; }
 .chart-wrap canvas { display: block; }
 
-/* ── LOADING / ERROR ────────────────────────────────────────────────── */
-.loading, .error-msg {
+/* ── GRID LAYOUTS ────────────────────────────────────────────────────────── */
+.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3   { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.section-gap { margin-bottom: 20px; }
+@media (max-width: 960px) { .grid-2, .grid-3, .grid-2-1 { grid-template-columns: 1fr; } }
+
+/* ── SKELETON / LOADING ──────────────────────────────────────────────────── */
+.loading {
   display: flex; align-items: center; justify-content: center;
   min-height: 140px; color: var(--muted); font-size: 13px; gap: 10px;
 }
-.error-msg { color: #e05252; }
-.spinner {
-  width: 20px; height: 20px;
-  border: 2.5px solid var(--grid); border-top-color: var(--accent);
-  border-radius: 50%; animation: spin .7s linear infinite;
+.error-msg {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 140px; color: var(--red); font-size: 13px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid var(--grid); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0;
+}
 
-/* ── TABLE ──────────────────────────────────────────────────────────── */
+/* ── TABLE ───────────────────────────────────────────────────────────────── */
 .table-wrap { overflow-x: auto; }
 table {
   width: 100%; border-collapse: collapse;
   font-size: 13px; font-variant-numeric: tabular-nums;
 }
 thead th {
-  text-align: left; padding: 11px 14px;
+  text-align: left; padding: 10px 14px;
   color: var(--muted); font-weight: 700; font-size: 11px;
-  text-transform: uppercase; letter-spacing: .07em;
-  border-bottom: 1.5px solid var(--grid);
+  text-transform: uppercase; letter-spacing: .08em;
+  border-bottom: 1px solid var(--grid);
   white-space: nowrap; cursor: pointer; user-select: none;
   background: var(--surface2);
 }
 thead th:hover { color: var(--accent); }
-thead th .sort-icon { margin-left: 4px; opacity: .45; }
+thead th .sort-icon { margin-left: 4px; opacity: .4; }
 thead th.sorted { color: var(--accent); }
 thead th.sorted .sort-icon { opacity: 1; }
+
 tbody tr { border-bottom: 1px solid var(--grid); transition: background .1s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--surface2); }
-tbody td { padding: 11px 14px; color: var(--ink); white-space: nowrap; }
-tbody td.muted { color: var(--ink2); font-size: 12.5px; }
+tbody td { padding: 12px 14px; color: var(--ink); white-space: nowrap; }
+tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "Fira Code", monospace; }
+
 .tfoot-row td {
   font-weight: 700; border-top: 2px solid var(--grid);
-  color: var(--ink); background: var(--surface2); padding: 12px 14px;
+  color: var(--ink); background: var(--surface2);
+  padding: 13px 14px;
 }
 
-/* ── TABLE TOOLBAR ──────────────────────────────────────────────────── */
+/* ── TABLE TOOLBAR ───────────────────────────────────────────────────────── */
 .table-toolbar {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .table-toolbar h3 {
   font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -.2px;
 }
 .btn-csv {
   padding: 7px 14px; border-radius: var(--radius);
-  background: var(--surface2); border: 1.5px solid var(--baseline);
-  color: var(--ink2); font-size: 12px; font-weight: 500;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  color: var(--ink2); font-size: 12px; font-weight: 600;
   display: flex; align-items: center; gap: 6px; transition: all .15s;
 }
-.btn-csv:hover { border-color: var(--s2); color: var(--s2); background: var(--card); }
+.btn-csv:hover { border-color: var(--green); color: var(--green); }
 
-/* ── EAN SECTION ────────────────────────────────────────────────────── */
+/* ── EAN SECTION ─────────────────────────────────────────────────────────── */
 .ean-section {
   background: var(--card); border-radius: var(--radius-lg);
-  border: 1px solid var(--border); padding: 20px 24px;
-  margin-bottom: 20px; box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border); box-shadow: var(--shadow-card);
+  padding: 22px 24px; margin-bottom: 20px;
 }
 .ean-section h3 {
   font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 14px;
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px;
 }
 .ean-input-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
 .ean-autocomplete { position: relative; flex: 1; min-width: 240px; }
 .ean-autocomplete input {
-  width: 100%; padding: 10px 14px;
-  border: 1.5px solid var(--baseline); border-radius: var(--radius);
-  background: var(--surface); color: var(--ink); font-size: 14px;
+  width: 100%; padding: 11px 16px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--surface2); color: var(--ink); font-size: 14px;
   outline: none; transition: border-color .15s, box-shadow .15s;
 }
 .ean-autocomplete input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--surface);
 }
 .autocomplete-dropdown {
-  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
   z-index: 300; max-height: 240px; overflow-y: auto; display: none;
 }
 .autocomplete-dropdown.open { display: block; }
 .ac-item {
-  padding: 10px 14px; cursor: pointer; transition: background .1s;
+  padding: 11px 16px; cursor: pointer; transition: background .1s;
   display: flex; flex-direction: column; gap: 2px;
   border-bottom: 1px solid var(--border);
 }
@@ -483,86 +690,125 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
 .ac-item .ac-ean { font-size: 11px; color: var(--muted); }
 
 .btn {
-  padding: 10px 18px; border-radius: var(--radius); border: none;
-  font-size: 13.5px; font-weight: 600; transition: all .15s;
+  padding: 11px 18px; border-radius: var(--radius); border: none;
+  font-size: 13px; font-weight: 700; transition: all .15s; white-space: nowrap;
 }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
-  color: #fff; box-shadow: 0 2px 8px var(--accent-glow);
+  color: #fff; box-shadow: 0 2px 10px var(--accent-glow);
 }
-.btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.btn-primary:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+.btn-primary:active { transform: none; }
 .btn-secondary {
-  background: var(--surface2); border: 1.5px solid var(--baseline); color: var(--ink2);
+  background: var(--surface2); border: 1.5px solid var(--border); color: var(--ink2);
 }
 .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
-.ean-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.ean-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .ean-chip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 11px; background: var(--accent-glow);
-  border: 1.5px solid rgba(0,114,206,.25); border-radius: 20px;
-  font-size: 12.5px;
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 100px; font-size: 12.5px;
+  animation: fadeUp .2s ease;
 }
 .ean-chip .chip-name { font-weight: 600; color: var(--accent); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ean-chip .chip-ean { color: var(--muted); font-size: 11.5px; }
 .ean-chip .chip-remove {
   border: none; background: none; color: var(--muted);
-  font-size: 16px; line-height: 1; padding: 0 1px; cursor: pointer;
+  font-size: 18px; line-height: 1; padding: 0 1px; cursor: pointer; transition: color .15s;
 }
-.ean-chip .chip-remove:hover { color: var(--s5); }
+.ean-chip .chip-remove:hover { color: var(--red); }
 
-/* ── TOOLTIP ────────────────────────────────────────────────────────── */
-.chart-tooltip {
-  position: fixed; background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px 14px;
-  font-size: 12.5px; pointer-events: none; opacity: 0;
-  transition: opacity .1s; box-shadow: var(--shadow);
-  z-index: 999; max-width: 240px; line-height: 1.6;
-}
-
-/* ── EMPTY STATE ────────────────────────────────────────────────────── */
+/* ── EMPTY STATE ─────────────────────────────────────────────────────────── */
 .empty-state {
-  text-align: center; padding: 56px 24px; color: var(--muted);
+  text-align: center; padding: 60px 24px; color: var(--muted);
 }
-.empty-state svg { display: block; margin: 0 auto 14px; opacity: .4; }
-.empty-state p { font-size: 13px; }
+.empty-state svg { display: block; margin: 0 auto 16px; opacity: .3; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
 
-/* ── SCROLLBAR ──────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ── CUSTOM TOOLTIP ──────────────────────────────────────────────────────── */
+.chart-tooltip {
+  position: fixed;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12.5px; pointer-events: none; opacity: 0;
+  transition: opacity .1s; box-shadow: var(--shadow-lg);
+  z-index: 999; max-width: 240px; line-height: 1.65;
+  backdrop-filter: blur(8px);
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--baseline); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--grid); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── MOBILE SIDEBAR ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 60px; }
+  .sidebar-logo-text,
+  .sidebar-section-lbl,
+  .tab-btn span,
+  .sidebar-user-info,
+  .sidebar-logout { display: none; }
+  .tab-btn { padding: 11px; justify-content: center; }
+  .tab-btn .nav-icon { width: 36px; height: 36px; }
+  .sidebar-bottom { padding: 16px 10px; }
+  .sidebar-avatar { margin: 0 auto; }
+  .topbar { padding: 0 16px; }
+  .main-content { padding: 16px; }
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════════════════════
      LOGIN PAGE
-═══════════════════════════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════════════════════ -->
 <div id="loginPage">
-  <div class="login-left">
-    <div class="login-left-inner">
-      <div class="login-brand">
-        <div class="login-brand-icon">🛒</div>
-        <div class="login-brand-name">
-          <strong>Carrefour Argentina</strong>
-          <span>eCommerce Analytics</span>
+  <div class="login-blob login-blob-1"></div>
+  <div class="login-blob login-blob-2"></div>
+  <div class="login-blob login-blob-3"></div>
+  <div class="login-grid"></div>
+
+  <div class="login-card">
+    <div class="login-left">
+      <div>
+        <div class="login-brand">
+          <div class="login-brand-icon">🛒</div>
+          <div class="login-brand-name">
+            <strong>Carrefour Argentina</strong>
+            <span>eCommerce Analytics</span>
+          </div>
+        </div>
+        <div class="login-headline">
+          Datos que<br><em>impulsan</em><br>decisiones.
+        </div>
+        <div class="login-sub">
+          Plataforma centralizada de Retail Media Analytics para el equipo de eCommerce de Carrefour Argentina.
         </div>
       </div>
-      <div class="login-headline">
-        Datos que<br><em>impulsan</em><br>decisiones.
-      </div>
-      <div class="login-sub">
-        Plataforma de análisis de Retail Media para el equipo de eCommerce de Carrefour Argentina.
-      </div>
-      <div class="login-dots">
-        <span></span><span></span><span></span>
+      <div class="login-stats">
+        <div>
+          <div class="login-stat-val">GA4</div>
+          <div class="login-stat-lbl">Fuente de datos</div>
+        </div>
+        <div>
+          <div class="login-stat-val">VTEX</div>
+          <div class="login-stat-lbl">Catálogo</div>
+        </div>
+        <div>
+          <div class="login-stat-val">Real‑time</div>
+          <div class="login-stat-lbl">Actualización</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="login-right">
-    <div class="login-form-wrap">
+    <div class="login-right">
       <div class="login-form-title">Bienvenido</div>
       <div class="login-form-sub">Ingresá con tus credenciales corporativas</div>
 
@@ -581,15 +827,15 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     DASHBOARD (oculto hasta login)
-═══════════════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════════════════════
+     DASHBOARD
+════════════════════════════════════════════════════════════════════════════ -->
 <div id="dashboard">
 
 <script>
 (function(){
-  const PWD = "RetailMedia1234";
-  const KEY = "rm_auth";
+  const PWD  = "RetailMedia1234";
+  const KEY  = "rm_auth";
   const UKEY = "rm_user";
 
   function unlock() {
@@ -623,165 +869,225 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
 })();
 </script>
 
-<!-- Mock banner -->
-<div class="mock-banner" id="mockBanner">
-  ⚠ Modo demo — mostrando datos de ejemplo. Configurá tus credenciales para ver datos reales.
-</div>
+<div class="shell">
 
-<!-- Header -->
-<header class="header">
-  <div class="header-brand">
-    <div class="header-brand-badge">🛒</div>
-    <div class="header-brand-text">
-      <div class="header-brand-main">Carrefour Argentina</div>
-      <div class="header-brand-sub">eCommerce Analytics</div>
-    </div>
-  </div>
-
-  <div class="header-sep"></div>
-  <div class="header-greeting" id="headerGreeting"></div>
-
-  <div class="header-spacer"></div>
-
-  <div class="date-chips" id="dateChips">
-    <button class="chip" data-range="7daysAgo">7D</button>
-    <button class="chip active" data-range="30daysAgo">30D</button>
-    <button class="chip" data-range="60daysAgo">60D</button>
-    <button class="chip" data-range="90daysAgo">90D</button>
-    <button class="chip" data-range="custom">Rango</button>
-  </div>
-  <div class="custom-dates" id="customDates">
-    <input type="date" id="dateFrom" class="date-input">
-    <span style="color:var(--muted)">→</span>
-    <input type="date" id="dateTo" class="date-input">
-    <button class="btn-apply" onclick="applyCustomRange()">Aplicar</button>
-  </div>
-  <button class="icon-btn" title="Actualizar" onclick="refreshAll()" id="refreshBtn">↻</button>
-  <button class="icon-btn" title="Alternar tema" onclick="toggleTheme()">◑</button>
-</header>
-
-<!-- Tab nav -->
-<nav class="tabs-bar">
-  <button class="tab-btn active" data-tab="tab1">📈 Audiencia</button>
-  <button class="tab-btn" data-tab="tab2">🔍 SKUs / EANs</button>
-</nav>
-
-<!-- ══════════════════════════════════════════════════════════════
-     TAB 1: Audiencia
-════════════════════════════════════════════════════════════════ -->
-<main class="content">
-<div id="tab1" class="tab-panel active">
-
-  <div class="kpi-grid section-gap">
-    <div class="kpi-card">
-      <div class="kpi-icon">👥</div>
-      <div class="kpi-label">Usuarios Activos</div>
-      <div class="kpi-value" id="kpiUsers">—</div>
-      <div class="kpi-sub" id="kpiUsersSub">en el período seleccionado</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">🔁</div>
-      <div class="kpi-label">Sesiones</div>
-      <div class="kpi-value" id="kpiSessions">—</div>
-      <div class="kpi-sub" id="kpiSessionsSub">en el período seleccionado</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">📊</div>
-      <div class="kpi-label">Sesiones / Usuario</div>
-      <div class="kpi-value" id="kpiRatio">—</div>
-      <div class="kpi-sub">promedio del período</div>
-    </div>
-  </div>
-
-  <div class="card section-gap">
-    <div class="card-header">
-      <span class="card-title">Usuarios activos y sesiones en el tiempo</span>
-    </div>
-    <div class="card-body">
-      <div class="chart-wrap" style="height:240px">
-        <div class="loading" id="overviewLoading"><div class="spinner"></div> Cargando…</div>
-        <canvas id="overviewChart" style="display:none"></canvas>
+  <!-- ── SIDEBAR ──────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-row">
+        <div class="sidebar-logo-icon">🛒</div>
+        <div class="sidebar-logo-text">
+          <strong>Carrefour</strong>
+          <span>eCommerce Analytics</span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-header"><span class="card-title">Agregados al carrito por categoría</span></div>
-    <div class="card-body">
-      <div class="chart-wrap" style="height:320px">
-        <div class="loading" id="catLoading"><div class="spinner"></div> Cargando…</div>
-        <canvas id="catChart" style="display:none"></canvas>
+    <div class="sidebar-section-lbl">Menú</div>
+
+    <nav class="sidebar-nav">
+      <button class="tab-btn active" data-tab="tab1">
+        <span class="nav-icon">📈</span>
+        <span>Audiencia</span>
+      </button>
+      <button class="tab-btn" data-tab="tab2">
+        <span class="nav-icon">🔍</span>
+        <span>SKUs / EANs</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">Usuario</div>
+          <div class="sidebar-user-role">eCommerce Team</div>
+        </div>
+        <button class="sidebar-logout" title="Cerrar sesión" onclick="doLogout()">⏻</button>
       </div>
     </div>
+  </aside>
+
+  <!-- ── TOPBAR ────────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-greeting" id="headerGreeting"></div>
+    <div class="topbar-spacer"></div>
+
+    <div class="date-chips" id="dateChips">
+      <button class="chip" data-range="7daysAgo">7D</button>
+      <button class="chip active" data-range="30daysAgo">30D</button>
+      <button class="chip" data-range="60daysAgo">60D</button>
+      <button class="chip" data-range="90daysAgo">90D</button>
+      <button class="chip" data-range="custom">Rango</button>
+    </div>
+    <div class="custom-dates" id="customDates">
+      <input type="date" id="dateFrom" class="date-input">
+      <span style="color:var(--muted);font-size:12px">→</span>
+      <input type="date" id="dateTo" class="date-input">
+      <button class="btn-apply" onclick="applyCustomRange()">Aplicar</button>
+    </div>
+    <button class="icon-btn" title="Actualizar" onclick="refreshAll()" id="refreshBtn">↻</button>
+    <button class="icon-btn" title="Alternar tema" onclick="toggleTheme()">◑</button>
+  </header>
+
+  <!-- Mock banner -->
+  <div class="mock-banner" id="mockBanner">
+    ⚠ Modo demo — datos de ejemplo. Configurá tus credenciales para ver datos reales de GA4.
   </div>
 
-</div>
+  <!-- ── MAIN CONTENT ───────────────────────────────────────────────────────── -->
+  <main class="main-content">
 
-<!-- ══════════════════════════════════════════════════════════════
-     TAB 2: SKUs / EANs
-════════════════════════════════════════════════════════════════ -->
-<div id="tab2" class="tab-panel">
+    <!-- ═══════════════════════════════════════════════════
+         TAB 1: Audiencia
+    ════════════════════════════════════════════════════ -->
+    <div id="tab1" class="tab-panel active">
 
-  <div class="ean-section section-gap">
-    <h3>Filtrar por EAN</h3>
-    <div class="ean-input-row">
-      <div class="ean-autocomplete">
-        <input type="text" id="eanInput" placeholder="Ingresá el EAN exacto del producto (ej: 7790742625304)" autocomplete="off">
-        <div class="autocomplete-dropdown" id="acDropdown"></div>
+      <div class="section-gap">
+        <div class="section-title">Visión general</div>
+        <div class="section-sub">Métricas de audiencia y comportamiento de sesiones.</div>
       </div>
-      <button class="btn btn-primary" onclick="addEanFromInput()">+ Agregar</button>
-      <button class="btn btn-secondary" onclick="clearEans()">Limpiar</button>
-      <button class="btn btn-primary" onclick="runSkuReport()">Consultar</button>
+
+      <div class="kpi-grid section-gap">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-label">Usuarios Activos</div>
+          <div class="kpi-value" id="kpiUsers">—</div>
+          <div class="kpi-sub" id="kpiUsersSub">en el período seleccionado</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon">🔁</div>
+          </div>
+          <div class="kpi-label">Sesiones</div>
+          <div class="kpi-value" id="kpiSessions">—</div>
+          <div class="kpi-sub" id="kpiSessionsSub">en el período seleccionado</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon">📊</div>
+          </div>
+          <div class="kpi-label">Sesiones / Usuario</div>
+          <div class="kpi-value" id="kpiRatio">—</div>
+          <div class="kpi-sub">promedio del período</div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Usuarios activos y sesiones en el tiempo</div>
+            <div class="card-sub">Evolución diaria del período seleccionado</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:250px">
+            <div class="loading" id="overviewLoading"><div class="spinner"></div> Cargando…</div>
+            <canvas id="overviewChart" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Agregados al carrito por categoría</div>
+            <div class="card-sub">Top categorías por volumen de add-to-cart</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:340px">
+            <div class="loading" id="catLoading"><div class="spinner"></div> Cargando…</div>
+            <canvas id="catChart" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div class="ean-chips" id="eanChips"></div>
-    <div style="margin-top:10px; font-size:12px; color:var(--muted)">
-      💡 Ingresá el código EAN de 13 dígitos. Podés agregar múltiples EANs para comparar productos.
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="table-toolbar">
-        <h3>Métricas por EAN</h3>
-        <button class="btn-csv" onclick="exportCsv('skuTable', 'sku-metrics')">⬇ Exportar CSV</button>
-      </div>
-      <div class="loading" id="skuLoading" style="display:none"><div class="spinner"></div> Cargando…</div>
-      <div class="error-msg" id="skuError" style="display:none"></div>
-      <div id="skuEmpty" class="empty-state">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        <p>Seleccioná uno o más EANs y hacé clic en <strong>Consultar</strong>.</p>
-      </div>
-      <div class="table-wrap" id="skuTableWrap" style="display:none">
-        <table id="skuTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable('skuTable',0)">Item ID <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('skuTable',1)">Nombre <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('skuTable',2)">Add to Cart <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('skuTable',3)" class="sorted">Qty Vendida <span class="sort-icon">↓</span></th>
-              <th onclick="sortTable('skuTable',4)">Revenue <span class="sort-icon">↕</span></th>
-            </tr>
-          </thead>
-          <tbody id="skuTbody"></tbody>
-          <tfoot id="skuTfoot"></tfoot>
-        </table>
-      </div>
-    </div>
-  </div>
+    <!-- ═══════════════════════════════════════════════════
+         TAB 2: SKUs / EANs
+    ════════════════════════════════════════════════════ -->
+    <div id="tab2" class="tab-panel">
 
-  <div class="card" style="margin-top:20px">
-    <div class="card-header"><span class="card-title">Sesiones por fuente / medio</span></div>
-    <div class="card-body">
-      <div class="chart-wrap" style="height:340px">
-        <div class="loading" id="smLoading"><div class="spinner"></div> Cargando…</div>
-        <canvas id="smChart" style="display:none"></canvas>
+      <div class="section-gap">
+        <div class="section-title">SKUs / EANs</div>
+        <div class="section-sub">Métricas de producto y análisis de fuentes de tráfico.</div>
       </div>
-    </div>
-  </div>
 
-</div>
-</div>
-</main>
+      <div class="ean-section section-gap">
+        <h3>Filtrar por EAN</h3>
+        <div class="ean-input-row">
+          <div class="ean-autocomplete">
+            <input type="text" id="eanInput"
+              placeholder="Ingresá el EAN exacto del producto (ej: 7790742625304)"
+              autocomplete="off">
+            <div class="autocomplete-dropdown" id="acDropdown"></div>
+          </div>
+          <button class="btn btn-primary" onclick="addEanFromInput()">+ Agregar</button>
+          <button class="btn btn-secondary" onclick="clearEans()">Limpiar</button>
+          <button class="btn btn-primary" onclick="runSkuReport()">Consultar</button>
+        </div>
+        <div class="ean-chips" id="eanChips"></div>
+        <div style="margin-top:12px; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px">
+          <span style="opacity:.6">💡</span>
+          Ingresá el código EAN de 13 dígitos. Podés agregar múltiples EANs para comparar productos.
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-body">
+          <div class="table-toolbar">
+            <h3>Métricas por EAN</h3>
+            <button class="btn-csv" onclick="exportCsv('skuTable','sku-metrics')">⬇ Exportar CSV</button>
+          </div>
+          <div class="loading" id="skuLoading" style="display:none"><div class="spinner"></div> Cargando…</div>
+          <div class="error-msg" id="skuError" style="display:none"></div>
+          <div id="skuEmpty" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+            </svg>
+            <p>Seleccioná uno o más EANs y hacé clic en <strong>Consultar</strong>.</p>
+          </div>
+          <div class="table-wrap" id="skuTableWrap" style="display:none">
+            <table id="skuTable">
+              <thead>
+                <tr>
+                  <th onclick="sortTable('skuTable',0)">Item ID <span class="sort-icon">↕</span></th>
+                  <th onclick="sortTable('skuTable',1)">Nombre <span class="sort-icon">↕</span></th>
+                  <th onclick="sortTable('skuTable',2)">Add to Cart <span class="sort-icon">↕</span></th>
+                  <th onclick="sortTable('skuTable',3)" class="sorted">Qty Vendida <span class="sort-icon">↓</span></th>
+                  <th onclick="sortTable('skuTable',4)">Revenue <span class="sort-icon">↕</span></th>
+                </tr>
+              </thead>
+              <tbody id="skuTbody"></tbody>
+              <tfoot id="skuTfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Sesiones por fuente / medio</div>
+            <div class="card-sub">Top 10 canales de adquisición de tráfico</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:340px">
+            <div class="loading" id="smLoading"><div class="spinner"></div> Cargando…</div>
+            <canvas id="smChart" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div><!-- /shell -->
+</div><!-- /dashboard -->
 
 <div class="chart-tooltip" id="chartTooltip"></div>
 
@@ -797,13 +1103,12 @@ const state = {
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 const fmt = {
-  int: n => Number(n).toLocaleString("es-AR"),
-  money: n => "$ " + Number(n).toLocaleString("es-AR", {minimumFractionDigits: 2, maximumFractionDigits: 2}),
-  pct: n => Number(n).toFixed(2) + "%",
+  int:   n => Number(n).toLocaleString("es-AR"),
+  money: n => "$ " + Number(n).toLocaleString("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2}),
+  pct:   n => Number(n).toFixed(2) + "%",
 };
 
 function el(id) { return document.getElementById(id); }
-
 function showLoading(id) { const l = el(id); if (l) l.style.display = "flex"; }
 function hideLoading(id) { const l = el(id); if (l) l.style.display = "none"; }
 
@@ -813,7 +1118,23 @@ async function apiFetch(path) {
   return res.json();
 }
 
-// ── Greeting ──────────────────────────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── Count-up animation ────────────────────────────────────────────────────────
+function animateCounter(elem, endVal, formatFn, duration = 600) {
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    elem.textContent = formatFn(Math.round(endVal * eased));
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ── Greeting + sidebar user ───────────────────────────────────────────────────
 (function initGreeting() {
   const h = new Date().getHours();
   const saludo = h < 13 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
@@ -821,7 +1142,19 @@ async function apiFetch(path) {
   const nombre = user ? `, <strong>${escapeHtml(user)}</strong>` : "";
   const greetEl = el("headerGreeting");
   if (greetEl) greetEl.innerHTML = `${saludo}${nombre} 👋`;
+
+  if (user) {
+    const nameEl = el("sidebarName");
+    if (nameEl) nameEl.textContent = user;
+    const avatarEl = el("sidebarAvatar");
+    if (avatarEl) avatarEl.textContent = user.charAt(0).toUpperCase();
+  }
 })();
+
+function doLogout() {
+  sessionStorage.clear();
+  location.reload();
+}
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -887,6 +1220,20 @@ function destroyChart(key) {
   if (state.charts[key]) { state.charts[key].destroy(); delete state.charts[key]; }
 }
 
+function makeGradient(ctx, color, alpha1 = 0.35, alpha2 = 0) {
+  const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+  grad.addColorStop(0, color.replace(")", `, ${alpha1})`).replace("rgb", "rgba"));
+  grad.addColorStop(1, color.replace(")", `, ${alpha2})`).replace("rgb", "rgba"));
+  return grad;
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace("#","");
+  if (hex.length === 3) hex = hex.split("").map(c=>c+c).join("");
+  const n = parseInt(hex,16);
+  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
+}
+
 function chartDefaults() {
   return {
     responsive: true,
@@ -898,12 +1245,12 @@ function chartDefaults() {
     scales: {
       x: {
         grid: { color: cssVar("--grid"), lineWidth: 1 },
-        ticks: { color: cssVar("--muted"), font: { size: 11 } },
-        border: { color: cssVar("--baseline") },
+        ticks: { color: cssVar("--muted"), font: { size: 11, family: "Inter, sans-serif" } },
+        border: { color: cssVar("--grid") },
       },
       y: {
         grid: { color: cssVar("--grid"), lineWidth: 1 },
-        ticks: { color: cssVar("--muted"), font: { size: 11 } },
+        ticks: { color: cssVar("--muted"), font: { size: 11, family: "Inter, sans-serif" } },
         border: { color: "transparent" },
       },
     },
@@ -917,11 +1264,11 @@ function setupCustomTooltip(chart, labelFn) {
     if (!points.length) { tooltip.style.opacity = 0; return; }
     const {datasetIndex, index} = points[0];
     const label = chart.data.labels[index];
-    const val = chart.data.datasets[datasetIndex].data[index];
+    const val   = chart.data.datasets[datasetIndex].data[index];
     tooltip.innerHTML = labelFn ? labelFn(label, val, datasetIndex) : `<strong>${label}</strong>: ${fmt.int(val)}`;
     tooltip.style.opacity = 1;
     tooltip.style.left = (evt.clientX + 14) + "px";
-    tooltip.style.top = (evt.clientY - 32) + "px";
+    tooltip.style.top  = (evt.clientY - 32) + "px";
   });
   chart.canvas.addEventListener("mouseleave", () => { tooltip.style.opacity = 0; });
 }
@@ -935,8 +1282,8 @@ async function loadOverview() {
     if (data._mock) el("mockBanner").style.display = "block";
 
     const {activeUsers, sessions} = data.totals;
-    el("kpiUsers").textContent = fmt.int(activeUsers);
-    el("kpiSessions").textContent = fmt.int(sessions);
+    animateCounter(el("kpiUsers"), activeUsers, fmt.int);
+    animateCounter(el("kpiSessions"), sessions, fmt.int);
     el("kpiRatio").textContent = sessions > 0 ? (sessions / activeUsers).toFixed(2) : "—";
 
     const labels = data.rows.map(r => {
@@ -944,13 +1291,22 @@ async function loadOverview() {
       return `${d.slice(6,8)}/${d.slice(4,6)}`;
     });
     const users = data.rows.map(r => r.activeUsers);
-    const sess = data.rows.map(r => r.sessions);
+    const sess  = data.rows.map(r => r.sessions);
 
     hideLoading("overviewLoading");
     el("overviewChart").style.display = "block";
     destroyChart("overview");
 
-    state.charts.overview = new Chart(el("overviewChart"), {
+    const canvas = el("overviewChart");
+    const ctx    = canvas.getContext("2d");
+    const gradBlue  = ctx.createLinearGradient(0, 0, 0, 250);
+    gradBlue.addColorStop(0,   "rgba(79,142,247,0.35)");
+    gradBlue.addColorStop(1,   "rgba(79,142,247,0)");
+    const gradGreen = ctx.createLinearGradient(0, 0, 0, 250);
+    gradGreen.addColorStop(0,  "rgba(16,185,129,0.25)");
+    gradGreen.addColorStop(1,  "rgba(16,185,129,0)");
+
+    state.charts.overview = new Chart(canvas, {
       type: "line",
       data: {
         labels,
@@ -959,23 +1315,25 @@ async function loadOverview() {
             label: "Usuarios activos",
             data: users,
             borderColor: cssVar("--s1"),
-            backgroundColor: cssVar("--s1") + "18",
-            borderWidth: 2,
-            pointRadius: 3,
+            backgroundColor: gradBlue,
+            borderWidth: 2.5,
+            pointRadius: 0,
             pointHoverRadius: 5,
+            pointBackgroundColor: cssVar("--s1"),
             fill: true,
-            tension: .35,
+            tension: .4,
           },
           {
             label: "Sesiones",
             data: sess,
             borderColor: cssVar("--s2"),
-            backgroundColor: "transparent",
+            backgroundColor: gradGreen,
             borderWidth: 2,
-            pointRadius: 3,
+            pointRadius: 0,
             pointHoverRadius: 5,
-            fill: false,
-            tension: .35,
+            pointBackgroundColor: cssVar("--s2"),
+            fill: true,
+            tension: .4,
           },
         ],
       },
@@ -984,10 +1342,12 @@ async function loadOverview() {
         plugins: {
           ...chartDefaults().plugins,
           legend: {
-            display: true,
-            position: "top",
-            align: "end",
-            labels: { color: cssVar("--ink2"), font: { size: 12 }, boxWidth: 12, usePointStyle: true, pointStyleWidth: 10 },
+            display: true, position: "top", align: "end",
+            labels: {
+              color: cssVar("--ink2"),
+              font: { size: 12, family: "Inter, sans-serif" },
+              boxWidth: 10, usePointStyle: true, pointStyleWidth: 10,
+            },
           },
         },
       },
@@ -995,13 +1355,13 @@ async function loadOverview() {
 
     setupCustomTooltip(state.charts.overview, (label, val, dsIdx) => {
       const name = dsIdx === 0 ? "Usuarios activos" : "Sesiones";
-      return `<strong>${label}</strong><br>${name}: ${fmt.int(val)}`;
+      return `<strong style="color:var(--ink)">${label}</strong><br>${name}: <strong>${fmt.int(val)}</strong>`;
     });
 
   } catch(e) {
     hideLoading("overviewLoading");
     el("overviewChart").style.display = "none";
-    el("overviewLoading").innerHTML = `<span class="error-msg">Error: ${e.message}</span>`;
+    el("overviewLoading").innerHTML = `<span class="error-msg">⚠ ${e.message}</span>`;
     el("overviewLoading").style.display = "flex";
   }
 }
@@ -1013,9 +1373,10 @@ async function loadSourceMedium() {
     const data = await apiFetch(`/api/ga4/source-medium?start=${state.start}&end=${state.end}`);
     if (data._mock) el("mockBanner").style.display = "block";
 
-    const rows = data.rows.slice(0, 10);
+    const rows   = data.rows.slice(0, 10);
     const labels = rows.map(r => `${r.sessionSource} / ${r.sessionMedium}`);
     const values = rows.map(r => r.sessions);
+    const max    = Math.max(...values);
 
     hideLoading("smLoading");
     el("smChart").style.display = "block";
@@ -1027,10 +1388,12 @@ async function loadSourceMedium() {
         labels,
         datasets: [{
           data: values,
-          backgroundColor: cssVar("--s1") + "cc",
-          borderColor: cssVar("--s1"),
-          borderWidth: 1,
-          borderRadius: 4,
+          backgroundColor: values.map(v => {
+            const ratio = v / max;
+            return `rgba(79,142,247,${0.4 + ratio * 0.55})`;
+          }),
+          borderColor: "transparent",
+          borderRadius: 6,
           borderSkipped: "left",
         }],
       },
@@ -1041,11 +1404,11 @@ async function loadSourceMedium() {
           x: {
             grid: { color: cssVar("--grid") },
             ticks: { color: cssVar("--muted"), font: { size: 11 } },
-            border: { color: cssVar("--baseline") },
+            border: { color: cssVar("--grid") },
           },
           y: {
             grid: { display: false },
-            ticks: { color: cssVar("--ink2"), font: { size: 11 } },
+            ticks: { color: cssVar("--ink2"), font: { size: 12 } },
             border: { color: "transparent" },
           },
         },
@@ -1053,11 +1416,11 @@ async function loadSourceMedium() {
     });
 
     setupCustomTooltip(state.charts.sm, (label, val) =>
-      `<strong>${label}</strong><br>Sesiones: ${fmt.int(val)}`);
+      `<strong style="color:var(--ink)">${label}</strong><br>Sesiones: <strong>${fmt.int(val)}</strong>`);
 
   } catch(e) {
     hideLoading("smLoading");
-    el("smLoading").innerHTML = `<span class="error-msg">Error: ${e.message}</span>`;
+    el("smLoading").innerHTML = `<span class="error-msg">⚠ ${e.message}</span>`;
     el("smLoading").style.display = "flex";
   }
 }
@@ -1069,9 +1432,10 @@ async function loadCategoryViews() {
     const data = await apiFetch(`/api/ga4/category-views?start=${state.start}&end=${state.end}`);
     if (data._mock) el("mockBanner").style.display = "block";
 
-    const rows = data.rows.slice(0, 12);
+    const rows   = data.rows.slice(0, 12);
     const labels = rows.map(r => r.itemCategory || r.itemListName);
     const values = rows.map(r => r.itemsAddedToCart || r.itemListViews);
+    const max    = Math.max(...values);
 
     hideLoading("catLoading");
     el("catChart").style.display = "block";
@@ -1083,13 +1447,18 @@ async function loadCategoryViews() {
         labels,
         datasets: [{
           data: values,
-          backgroundColor: values.map((_, i) => {
-            const ratio = i / Math.max(values.length - 1, 1);
-            return `rgba(${hexToRgb(cssVar("--s1"))},${(1 - ratio * 0.55).toFixed(2)})`;
+          backgroundColor: values.map((v,i) => {
+            const ratio = v / max;
+            const colors = [
+              [79,142,247], [139,92,246], [16,185,129],
+              [245,158,11], [239,68,68],  [20,184,166],
+              [249,115,22], [236,72,153],
+            ];
+            const [r,g,b] = colors[i % colors.length];
+            return `rgba(${r},${g},${b},${0.5 + ratio * 0.45})`;
           }),
-          borderColor: cssVar("--s1"),
-          borderWidth: 1,
-          borderRadius: 4,
+          borderColor: "transparent",
+          borderRadius: 6,
           borderSkipped: "left",
         }],
       },
@@ -1100,11 +1469,11 @@ async function loadCategoryViews() {
           x: {
             grid: { color: cssVar("--grid") },
             ticks: { color: cssVar("--muted"), font: { size: 11 } },
-            border: { color: cssVar("--baseline") },
+            border: { color: cssVar("--grid") },
           },
           y: {
             grid: { display: false },
-            ticks: { color: cssVar("--ink2"), font: { size: 11 } },
+            ticks: { color: cssVar("--ink2"), font: { size: 12 } },
             border: { color: "transparent" },
           },
         },
@@ -1112,27 +1481,20 @@ async function loadCategoryViews() {
     });
 
     setupCustomTooltip(state.charts.cat, (label, val) =>
-      `<strong>${label}</strong><br>Agregados al carrito: ${fmt.int(val)}`);
+      `<strong style="color:var(--ink)">${label}</strong><br>Add to Cart: <strong>${fmt.int(val)}</strong>`);
 
   } catch(e) {
     hideLoading("catLoading");
-    el("catLoading").innerHTML = `<span class="error-msg">Error: ${e.message}</span>`;
+    el("catLoading").innerHTML = `<span class="error-msg">⚠ ${e.message}</span>`;
     el("catLoading").style.display = "flex";
   }
-}
-
-function hexToRgb(hex) {
-  hex = hex.replace("#","");
-  if (hex.length === 3) hex = hex.split("").map(c=>c+c).join("");
-  const n = parseInt(hex, 16);
-  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
 }
 
 // ── TAB 2: SKU metrics ────────────────────────────────────────────────────────
 let acTimer = null;
 
 function initEanAutocomplete() {
-  const input = el("eanInput");
+  const input    = el("eanInput");
   const dropdown = el("acDropdown");
 
   input.addEventListener("input", () => {
@@ -1143,7 +1505,7 @@ function initEanAutocomplete() {
   });
 
   input.addEventListener("keydown", e => {
-    if (e.key === "Enter") { addEanFromInput(); }
+    if (e.key === "Enter")  { addEanFromInput(); }
     if (e.key === "Escape") dropdown.classList.remove("open");
   });
 
@@ -1254,7 +1616,7 @@ function renderSkuTable(rows) {
   const tfoot = el("skuTfoot");
 
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Sin datos para los EANs seleccionados en el período</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px">Sin datos para los EANs seleccionados en el período</td></tr>`;
     tfoot.innerHTML = "";
     return;
   }
@@ -1262,17 +1624,17 @@ function renderSkuTable(rows) {
   tbody.innerHTML = rows.map(r => `
     <tr>
       <td class="muted">${r.itemId}</td>
-      <td style="font-weight:500">${escapeHtml(r.itemName || "—")}</td>
+      <td style="font-weight:600">${escapeHtml(r.itemName || "—")}</td>
       <td>${fmt.int(r.itemsAddedToCart)}</td>
       <td>${fmt.int(r.itemPurchaseQuantity)}</td>
-      <td>${fmt.money(r.itemRevenue)}</td>
+      <td style="font-weight:600;color:var(--green)">${fmt.money(r.itemRevenue)}</td>
     </tr>
   `).join("");
 
   const totals = rows.reduce((acc, r) => ({
-    itemsAddedToCart: acc.itemsAddedToCart + (r.itemsAddedToCart || 0),
-    itemPurchaseQuantity: acc.itemPurchaseQuantity + (r.itemPurchaseQuantity || 0),
-    itemRevenue: acc.itemRevenue + (r.itemRevenue || 0),
+    itemsAddedToCart:    acc.itemsAddedToCart    + (r.itemsAddedToCart    || 0),
+    itemPurchaseQuantity:acc.itemPurchaseQuantity + (r.itemPurchaseQuantity|| 0),
+    itemRevenue:         acc.itemRevenue          + (r.itemRevenue         || 0),
   }), {itemsAddedToCart:0, itemPurchaseQuantity:0, itemRevenue:0});
 
   tfoot.innerHTML = `
@@ -1280,7 +1642,7 @@ function renderSkuTable(rows) {
       <td colspan="2">Total · ${rows.length} SKU${rows.length !== 1 ? "s" : ""}</td>
       <td>${fmt.int(totals.itemsAddedToCart)}</td>
       <td>${fmt.int(totals.itemPurchaseQuantity)}</td>
-      <td>${fmt.money(totals.itemRevenue)}</td>
+      <td style="color:var(--green)">${fmt.money(totals.itemRevenue)}</td>
     </tr>
   `;
 }
@@ -1289,16 +1651,16 @@ function renderSkuTable(rows) {
 function sortTable(tableId, colIdx) {
   const table = el(tableId);
   const tbody = table.querySelector("tbody");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const rows  = Array.from(tbody.querySelectorAll("tr"));
   if (!rows.length) return;
 
-  const prev = state.sortState[tableId] || {col: -1, dir: 1};
-  const dir = prev.col === colIdx ? -prev.dir : -1;
+  const prev = state.sortState[tableId] || {col:-1, dir:1};
+  const dir  = prev.col === colIdx ? -prev.dir : -1;
   state.sortState[tableId] = {col: colIdx, dir};
 
   rows.sort((a, b) => {
-    const av = a.cells[colIdx]?.textContent.trim().replace(/[^0-9.,-]/g, "").replace(",",".");
-    const bv = b.cells[colIdx]?.textContent.trim().replace(/[^0-9.,-]/g, "").replace(",",".");
+    const av = a.cells[colIdx]?.textContent.trim().replace(/[^0-9.,-]/g,"").replace(",",".");
+    const bv = b.cells[colIdx]?.textContent.trim().replace(/[^0-9.,-]/g,"").replace(",",".");
     const an = parseFloat(av), bn = parseFloat(bv);
     if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
     return av.localeCompare(bv) * dir;
@@ -1316,14 +1678,14 @@ function sortTable(tableId, colIdx) {
 // ── CSV export ────────────────────────────────────────────────────────────────
 function exportCsv(tableId, filename) {
   const table = el(tableId);
-  const rows = [];
+  const rows  = [];
   table.querySelectorAll("thead tr, tbody tr, tfoot tr").forEach(tr => {
     const cells = Array.from(tr.querySelectorAll("th, td")).map(td =>
       `"${td.textContent.replace(/"/g,'""').trim()}"`
     );
     rows.push(cells.join(","));
   });
-  const blob = new Blob(["﻿" + rows.join("\n")], {type: "text/csv;charset=utf-8;"});
+  const blob = new Blob(["﻿" + rows.join("\n")], {type:"text/csv;charset=utf-8;"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `${filename}-${new Date().toISOString().slice(0,10)}.csv`;
@@ -1336,7 +1698,6 @@ function refreshAll() {
   btn.style.animation = "spin .5s linear infinite";
   btn.style.opacity = ".5";
   const tasks = [loadOverview(), loadSourceMedium(), loadCategoryViews()];
-  // Re-run SKU report if EANs are already loaded
   if (state.eans.length && el("skuTableWrap").style.display !== "none") {
     tasks.push(runSkuReport());
   }
@@ -1344,11 +1705,6 @@ function refreshAll() {
     btn.style.animation = "";
     btn.style.opacity = "";
   });
-}
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function escapeHtml(s) {
-  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -1365,6 +1721,5 @@ loadSourceMedium();
 loadCategoryViews();
 </script>
 
-</div><!-- /dashboard -->
 </body>
 </html>
