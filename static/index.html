@@ -860,8 +860,10 @@ function initDateChips() {
 }
 
 function applyCustomRange() {
+  const today = new Date().toISOString().slice(0, 10);
   const from = el("dateFrom").value;
-  const to = el("dateTo").value;
+  const rawTo = el("dateTo").value;
+  const to = rawTo > today ? today : rawTo;
   if (!from || !to) return;
   state.start = from;
   state.end = to;
@@ -1350,6 +1352,11 @@ function escapeHtml(s) {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+(function() {
+  const today = new Date().toISOString().slice(0, 10);
+  el("dateFrom").max = today;
+  el("dateTo").max = today;
+})();
 initDateChips();
 initTabs();
 initEanAutocomplete();
