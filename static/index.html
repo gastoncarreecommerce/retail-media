@@ -705,23 +705,12 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Sesiones por fuente / medio</span></div>
-      <div class="card-body">
-        <div class="chart-wrap" style="height:320px">
-          <div class="loading" id="smLoading"><div class="spinner"></div> Cargando…</div>
-          <canvas id="smChart" style="display:none"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Agregados al carrito por categoría</span></div>
-      <div class="card-body">
-        <div class="chart-wrap" style="height:320px">
-          <div class="loading" id="catLoading"><div class="spinner"></div> Cargando…</div>
-          <canvas id="catChart" style="display:none"></canvas>
-        </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Agregados al carrito por categoría</span></div>
+    <div class="card-body">
+      <div class="chart-wrap" style="height:320px">
+        <div class="loading" id="catLoading"><div class="spinner"></div> Cargando…</div>
+        <canvas id="catChart" style="display:none"></canvas>
       </div>
     </div>
   </div>
@@ -734,10 +723,10 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
 <div id="tab2" class="tab-panel">
 
   <div class="ean-section section-gap">
-    <h3>Filtrar por EAN / SKU</h3>
+    <h3>Filtrar por EAN</h3>
     <div class="ean-input-row">
       <div class="ean-autocomplete">
-        <input type="text" id="eanInput" placeholder="Buscar por EAN o nombre de producto…" autocomplete="off">
+        <input type="text" id="eanInput" placeholder="Ingresá el EAN exacto del producto (ej: 7790742625304)" autocomplete="off">
         <div class="autocomplete-dropdown" id="acDropdown"></div>
       </div>
       <button class="btn btn-primary" onclick="addEanFromInput()">+ Agregar</button>
@@ -745,6 +734,9 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
       <button class="btn btn-primary" onclick="runSkuReport()">Consultar</button>
     </div>
     <div class="ean-chips" id="eanChips"></div>
+    <div style="margin-top:10px; font-size:12px; color:var(--muted)">
+      💡 Ingresá el código EAN de 13 dígitos. Podés agregar múltiples EANs para comparar productos.
+    </div>
   </div>
 
   <div class="card">
@@ -773,6 +765,16 @@ tbody td.muted { color: var(--ink2); font-size: 12.5px; }
           <tbody id="skuTbody"></tbody>
           <tfoot id="skuTfoot"></tfoot>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-header"><span class="card-title">Sesiones por fuente / medio</span></div>
+    <div class="card-body">
+      <div class="chart-wrap" style="height:340px">
+        <div class="loading" id="smLoading"><div class="spinner"></div> Cargando…</div>
+        <canvas id="smChart" style="display:none"></canvas>
       </div>
     </div>
   </div>
@@ -1331,11 +1333,15 @@ function refreshAll() {
   const btn = el("refreshBtn");
   btn.style.animation = "spin .5s linear infinite";
   btn.style.opacity = ".5";
-  Promise.all([loadOverview(), loadSourceMedium(), loadCategoryViews()])
-    .finally(() => {
-      btn.style.animation = "";
-      btn.style.opacity = "";
-    });
+  const tasks = [loadOverview(), loadSourceMedium(), loadCategoryViews()];
+  // Re-run SKU report if EANs are already loaded
+  if (state.eans.length && el("skuTableWrap").style.display !== "none") {
+    tasks.push(runSkuReport());
+  }
+  Promise.all(tasks).finally(() => {
+    btn.style.animation = "";
+    btn.style.opacity = "";
+  });
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
