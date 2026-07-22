@@ -77,7 +77,7 @@ def _in_list_filter(field: str, values: list):
 # ── public API ────────────────────────────────────────────────────────────────
 
 def get_overview(start: str, end: str) -> dict:
-    """Active users + sessions grouped by date."""
+    """Active users + sessions + avg session duration grouped by date."""
     if _MOCK():
         return _mock_overview(start, end)
 
@@ -88,14 +88,70 @@ def get_overview(start: str, end: str) -> dict:
             property=_prop(),
             date_ranges=[_date_range(start, end)],
             dimensions=[_dim("date")],
-            metrics=[_metric("activeUsers"), _metric("sessions")],
+            metrics=[
+                _metric("activeUsers"),
+                _metric("sessions"),
+                _metric("averageSessionDuration"),
+            ],
             order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
         )
     )
-    rows = _rows_to_list(resp, ["date"], ["activeUsers", "sessions"])
-    total_users = sum(r["activeUsers"] for r in rows)
+    rows = _rows_to_list(resp, ["date"], ["activeUsers", "sessions", "averageSessionDuration"])
+    total_users    = sum(r["activeUsers"] for r in rows)
     total_sessions = sum(r["sessions"] for r in rows)
-    return {"rows": rows, "totals": {"activeUsers": total_users, "sessions": total_sessions}}
+    avg_duration   = (
+        sum(r["averageSessionDuration"] * r["sessions"] for r in rows) / total_sessions
+        if total_sessions > 0 else 0
+    )
+    return {
+        "rows": rows,
+        "totals": {
+            "activeUsers": total_users,
+            "sessions": total_sessions,
+            "averageSessionDuration": round(avg_duration, 1),
+        },
+    }
+
+
+def get_demographics(start: str, end: str) -> dict:
+    """Gender, age bracket and top interests. Requires Google Signals."""
+    if _MOCK():
+        return _mock_demographics()
+
+    from google.analytics.data_v1beta.types import RunReportRequest, OrderBy
+    client = _client()
+
+    gender_resp = client.run_report(RunReportRequest(
+        property=_prop(),
+        date_ranges=[_date_range(start, end)],
+        dimensions=[_dim("userGender")],
+        metrics=[_metric("activeUsers")],
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="activeUsers"), desc=True)],
+    ))
+    gender = _rows_to_list(gender_resp, ["userGender"], ["activeUsers"])
+
+    age_resp = client.run_report(RunReportRequest(
+        property=_prop(),
+        date_ranges=[_date_range(start, end)],
+        dimensions=[_dim("userAgeBracket")],
+        metrics=[_metric("activeUsers")],
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="activeUsers"), desc=True)],
+    ))
+    age = _rows_to_list(age_resp, ["userAgeBracket"], ["activeUsers"])
+
+    interest_resp = client.run_report(RunReportRequest(
+        property=_prop(),
+        date_ranges=[_date_range(start, end)],
+        dimensions=[_dim("brandingInterest")],
+        metrics=[_metric("activeUsers")],
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="activeUsers"), desc=True)],
+        limit=10,
+    ))
+    interests = _rows_to_list(interest_resp, ["brandingInterest"], ["activeUsers"])
+    # filter out "(not set)"
+    interests = [r for r in interests if r["brandingInterest"] not in ("(not set)", "unknown")]
+
+    return {"gender": gender, "age": age, "interests": interests}
 
 
 def get_source_medium(start: str, end: str) -> dict:
@@ -231,7 +287,6 @@ def get_sku_metrics(eans: list[str], start: str, end: str) -> dict:
 
 def _mock_overview(start: str, end: str) -> dict:
     random.seed(42)
-    # Generate 30 days of data regardless of range
     base = datetime.today() - timedelta(days=29)
     rows = []
     for i in range(30):
@@ -240,10 +295,49 @@ def _mock_overview(start: str, end: str) -> dict:
             "date": day.strftime("%Y%m%d"),
             "activeUsers": random.randint(800, 2400),
             "sessions": random.randint(1000, 3000),
+            "averageSessionDuration": round(random.uniform(90, 420), 1),
         })
-    total_users = sum(r["activeUsers"] for r in rows)
+    total_users    = sum(r["activeUsers"] for r in rows)
     total_sessions = sum(r["sessions"] for r in rows)
-    return {"rows": rows, "totals": {"activeUsers": total_users, "sessions": total_sessions}, "_mock": True}
+    avg_duration   = sum(r["averageSessionDuration"] * r["sessions"] for r in rows) / total_sessions
+    return {
+        "rows": rows,
+        "totals": {
+            "activeUsers": total_users,
+            "sessions": total_sessions,
+            "averageSessionDuration": round(avg_duration, 1),
+        },
+        "_mock": True,
+    }
+
+
+def _mock_demographics() -> dict:
+    return {
+        "_mock": True,
+        "gender": [
+            {"userGender": "female", "activeUsers": 28400},
+            {"userGender": "male",   "activeUsers": 21600},
+            {"userGender": "unknown","activeUsers": 5200},
+        ],
+        "age": [
+            {"userAgeBracket": "25-34", "activeUsers": 18700},
+            {"userAgeBracket": "35-44", "activeUsers": 14900},
+            {"userAgeBracket": "18-24", "activeUsers": 9800},
+            {"userAgeBracket": "45-54", "activeUsers": 7300},
+            {"userAgeBracket": "55-64", "activeUsers": 3100},
+            {"userAgeBracket": "65+",   "activeUsers": 1400},
+        ],
+        "interests": [
+            {"brandingInterest": "Shoppers",                   "activeUsers": 31200},
+            {"brandingInterest": "Food & Dining",              "activeUsers": 22400},
+            {"brandingInterest": "Home & Garden",              "activeUsers": 17800},
+            {"brandingInterest": "Beauty & Fitness",           "activeUsers": 14300},
+            {"brandingInterest": "Sports & Fitness",           "activeUsers": 11700},
+            {"brandingInterest": "Travel",                     "activeUsers": 9800},
+            {"brandingInterest": "Technology",                 "activeUsers": 8400},
+            {"brandingInterest": "News & Current Events",      "activeUsers": 6200},
+        ],
+    }
 
 
 def _mock_source_medium() -> dict:

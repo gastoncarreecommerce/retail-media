@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 /* ── Tokens ─────────────────────────────────────────────────────────────── */
 :root {
@@ -495,11 +496,11 @@ a { text-decoration: none; }
 /* ── KPI CARDS ───────────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px; margin-bottom: 20px;
 }
-@media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px)  { .kpi-grid { grid-template-columns: 1fr; } }
 
 .kpi-card {
   background: var(--card);
@@ -521,6 +522,14 @@ a { text-decoration: none; }
 .kpi-card:nth-child(1) { --kpi-color: var(--accent); }
 .kpi-card:nth-child(2) { --kpi-color: var(--green); }
 .kpi-card:nth-child(3) { --kpi-color: var(--purple); }
+.kpi-card:nth-child(4) { --kpi-color: var(--orange); }
+
+/* interest bars */
+.interest-bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.interest-bar-label { font-size:12.5px; color:var(--ink2); min-width:200px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.interest-bar-track { flex:1; height:8px; background:var(--grid); border-radius:4px; overflow:hidden; }
+.interest-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, var(--accent), var(--purple)); transition:width .6s ease; }
+.interest-bar-val { font-size:12px; color:var(--muted); min-width:60px; text-align:right; }
 
 /* decorative circle */
 .kpi-card::before {
@@ -973,6 +982,14 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
           <div class="kpi-value" id="kpiRatio">—</div>
           <div class="kpi-sub">promedio del período</div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon">⏱</div>
+          </div>
+          <div class="kpi-label">Tiempo Promedio de Sesión</div>
+          <div class="kpi-value" id="kpiDuration">—</div>
+          <div class="kpi-sub">promedio ponderado del período</div>
+        </div>
       </div>
 
       <div class="card section-gap">
@@ -990,7 +1007,7 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
         </div>
       </div>
 
-      <div class="card">
+      <div class="card section-gap">
         <div class="card-header">
           <div>
             <div class="card-title">Agregados al carrito por categoría</div>
@@ -1003,6 +1020,55 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
             <canvas id="catChart" style="display:none"></canvas>
           </div>
         </div>
+      </div>
+
+      <!-- Audiencias -->
+      <div style="margin-bottom:8px">
+        <div class="section-title" style="font-size:16px">Audiencias</div>
+        <div class="section-sub" style="margin-bottom:16px">Demografía e intereses · requiere Google Signals habilitado</div>
+      </div>
+
+      <div class="grid-2 section-gap" id="demoGrid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Género</div>
+          </div>
+          <div class="card-body" style="display:flex;align-items:center;gap:24px;justify-content:center">
+            <div class="loading" id="demoGenderLoading"><div class="spinner"></div> Cargando…</div>
+            <div id="demoGenderWrap" style="display:none;width:100%;max-width:220px;margin:0 auto">
+              <canvas id="genderChart" style="max-height:200px"></canvas>
+            </div>
+            <div id="genderLegend" style="display:none;min-width:120px"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Rango etario</div>
+          </div>
+          <div class="card-body">
+            <div class="loading" id="demoAgeLoading"><div class="spinner"></div> Cargando…</div>
+            <canvas id="ageChart" style="display:none;max-height:220px"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-header">
+          <div class="card-title">Top intereses / comportamientos</div>
+          <div class="card-sub">Segmentos de afinidad con mayor alcance</div>
+        </div>
+        <div class="card-body">
+          <div class="loading" id="demoInterestLoading"><div class="spinner"></div> Cargando…</div>
+          <div id="interestBars" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- Botón descarga Excel global -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button class="btn btn-primary" onclick="exportExcel()" style="display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 20px">
+          <span>📥</span> Descargar reporte Excel
+        </button>
       </div>
 
     </div>
@@ -1041,7 +1107,10 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
         <div class="card-body">
           <div class="table-toolbar">
             <h3>Métricas por EAN</h3>
-            <button class="btn-csv" onclick="exportCsv('skuTable','sku-metrics')">⬇ Exportar CSV</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn-csv" onclick="exportCsv('skuTable','sku-metrics')">⬇ CSV</button>
+              <button class="btn-csv" onclick="exportSkuExcel()" style="border-color:var(--green);color:var(--green)">📥 Excel</button>
+            </div>
           </div>
           <div class="loading" id="skuLoading" style="display:none"><div class="spinner"></div> Cargando…</div>
           <div class="error-msg" id="skuError" style="display:none"></div>
@@ -1289,6 +1358,8 @@ async function loadOverview() {
     animateCounter(el("kpiUsers"), activeUsers, fmt.int);
     animateCounter(el("kpiSessions"), sessions, fmt.int);
     el("kpiRatio").textContent = sessions > 0 ? (sessions / activeUsers).toFixed(2) : "—";
+    const dur = data.totals.averageSessionDuration || 0;
+    el("kpiDuration").textContent = dur > 0 ? fmtDuration(dur) : "—";
 
     const labels = data.rows.map(r => {
       const d = r.date;
@@ -1508,6 +1579,193 @@ async function loadCategoryViews() {
   }
 }
 
+// ── Duration formatter ────────────────────────────────────────────────────────
+function fmtDuration(seconds) {
+  const s = Math.round(seconds);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${String(rem).padStart(2, "0")}`;
+}
+
+// ── Demographics ──────────────────────────────────────────────────────────────
+async function loadDemographics() {
+  try {
+    const data = await apiFetch(`/api/ga4/demographics?start=${state.start}&end=${state.end}`);
+    if (data._mock) el("mockBanner").style.display = "block";
+    state._demoData = data;
+
+    // ─ Gender donut ─
+    hideLoading("demoGenderLoading");
+    const genderWrap = el("demoGenderWrap");
+    const genderLegend = el("genderLegend");
+    genderWrap.style.display = "block";
+    genderLegend.style.display = "block";
+
+    const gRows = data.gender.filter(r => r.userGender !== "unknown");
+    const gLabels = gRows.map(r => r.userGender === "female" ? "Femenino" : "Masculino");
+    const gVals   = gRows.map(r => r.activeUsers);
+    const gColors = ["rgba(236,72,153,.85)", "rgba(79,142,247,.85)"];
+
+    destroyChart("gender");
+    state.charts.gender = new Chart(el("genderChart"), {
+      type: "doughnut",
+      data: { labels: gLabels, datasets: [{ data: gVals, backgroundColor: gColors, borderWidth: 2, borderColor: "var(--card)", hoverOffset: 6 }] },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        cutout: "68%",
+        plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: {
+          label: ctx => ` ${ctx.label}: ${fmt.int(ctx.raw)} (${((ctx.raw / gVals.reduce((a,b)=>a+b,0))*100).toFixed(1)}%)`
+        }}}
+      },
+    });
+
+    const total = gVals.reduce((a,b)=>a+b,0);
+    genderLegend.innerHTML = gRows.map((r,i) => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${gColors[i]};flex-shrink:0"></span>
+        <span style="font-size:12.5px;color:var(--ink2)">${gLabels[i]}</span>
+        <span style="margin-left:auto;font-size:13px;font-weight:700;color:var(--ink)">${((r.activeUsers/total)*100).toFixed(1)}%</span>
+      </div>`).join("");
+
+    // ─ Age bar chart ─
+    hideLoading("demoAgeLoading");
+    el("ageChart").style.display = "block";
+    const ageRows   = data.age;
+    const ageLabels = ageRows.map(r => r.userAgeBracket);
+    const ageVals   = ageRows.map(r => r.activeUsers);
+    const ageMax    = Math.max(...ageVals);
+
+    destroyChart("age");
+    state.charts.age = new Chart(el("ageChart"), {
+      type: "bar",
+      data: {
+        labels: ageLabels,
+        datasets: [{
+          data: ageVals,
+          backgroundColor: ageVals.map(v => `rgba(139,92,246,${0.4 + (v/ageMax)*0.55})`),
+          borderColor: "transparent",
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        ...chartDefaults(),
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      },
+    });
+
+    // ─ Interests ─
+    hideLoading("demoInterestLoading");
+    const interestEl = el("interestBars");
+    interestEl.style.display = "block";
+    const maxInterest = Math.max(...data.interests.map(r => r.activeUsers));
+    interestEl.innerHTML = data.interests.map(r => `
+      <div class="interest-bar-row">
+        <span class="interest-bar-label">${escapeHtml(r.brandingInterest)}</span>
+        <div class="interest-bar-track">
+          <div class="interest-bar-fill" style="width:${((r.activeUsers/maxInterest)*100).toFixed(1)}%"></div>
+        </div>
+        <span class="interest-bar-val">${fmt.int(r.activeUsers)}</span>
+      </div>
+    `).join("");
+
+  } catch(e) {
+    ["demoGenderLoading","demoAgeLoading","demoInterestLoading"].forEach(id => {
+      const el2 = el(id);
+      if (el2) { el2.innerHTML = `<span class="error-msg" style="font-size:12px">⚠ ${e.message}</span>`; el2.style.display = "flex"; }
+    });
+  }
+}
+
+// ── Excel exports ─────────────────────────────────────────────────────────────
+function makeSheet(headers, rows) {
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  const colWidths = headers.map((h, i) => ({
+    wch: Math.max(h.length, ...rows.map(r => String(r[i] ?? "").length)) + 2
+  }));
+  ws["!cols"] = colWidths;
+  return ws;
+}
+
+function exportSkuExcel() {
+  const table = el("skuTable");
+  if (!table) return;
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: SKU data
+  const headers = ["Item ID", "Nombre", "Add to Cart", "Qty Vendida", "Revenue (ARS)"];
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.querySelectorAll("tr")).map(tr =>
+    Array.from(tr.querySelectorAll("td")).map(td => {
+      const t = td.textContent.trim().replace(/\./g, "").replace(",", ".");
+      const n = parseFloat(t);
+      return isNaN(n) ? td.textContent.trim() : n;
+    })
+  );
+  XLSX.utils.book_append_sheet(wb, makeSheet(headers, rows), "SKU Metrics");
+
+  // Sheet 2: KPIs resumen
+  const kpiRows = [
+    ["Métrica", "Valor"],
+    ["Usuarios Activos",       el("kpiUsers")?.textContent    || ""],
+    ["Sesiones",               el("kpiSessions")?.textContent || ""],
+    ["Sesiones / Usuario",     el("kpiRatio")?.textContent    || ""],
+    ["Tiempo Promedio Sesión", el("kpiDuration")?.textContent || ""],
+  ];
+  const wsKpi = XLSX.utils.aoa_to_sheet(kpiRows);
+  wsKpi["!cols"] = [{wch:28},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, wsKpi, "Resumen KPIs");
+
+  const date = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `carrefour-retail-media-skus-${date}.xlsx`);
+}
+
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const date = new Date().toISOString().slice(0, 10);
+
+  // Sheet 1: KPIs
+  const kpiRows = [
+    ["Carrefour Argentina · eCommerce Analytics", "", "", ""],
+    ["Exportado el", new Date().toLocaleString("es-AR"), "", ""],
+    ["Período", `${state.start} → ${state.end}`, "", ""],
+    [],
+    ["Métrica", "Valor"],
+    ["Usuarios Activos",       el("kpiUsers")?.textContent    || ""],
+    ["Sesiones",               el("kpiSessions")?.textContent || ""],
+    ["Sesiones / Usuario",     el("kpiRatio")?.textContent    || ""],
+    ["Tiempo Promedio Sesión", el("kpiDuration")?.textContent || ""],
+  ];
+  const wsKpi = XLSX.utils.aoa_to_sheet(kpiRows);
+  wsKpi["!cols"] = [{wch:30},{wch:24}];
+  XLSX.utils.book_append_sheet(wb, wsKpi, "Resumen");
+
+  // Sheet 2: SKU table (if loaded)
+  const skuTable = el("skuTable");
+  if (skuTable && el("skuTableWrap").style.display !== "none") {
+    const headers = ["Item ID","Nombre","Add to Cart","Qty Vendida","Revenue (ARS)"];
+    const rows = Array.from(skuTable.querySelector("tbody").querySelectorAll("tr")).map(tr =>
+      Array.from(tr.querySelectorAll("td")).map(td => {
+        const t = td.textContent.trim().replace(/\./g,"").replace(",",".");
+        const n = parseFloat(t);
+        return isNaN(n) ? td.textContent.trim() : n;
+      })
+    );
+    XLSX.utils.book_append_sheet(wb, makeSheet(headers, rows), "SKUs");
+  }
+
+  // Sheet 3: Demographics gender
+  if (state._demoData) {
+    const gRows = state._demoData.gender.map(r => [r.userGender, r.activeUsers]);
+    XLSX.utils.book_append_sheet(wb, makeSheet(["Género","Usuarios Activos"], gRows), "Género");
+    const aRows = state._demoData.age.map(r => [r.userAgeBracket, r.activeUsers]);
+    XLSX.utils.book_append_sheet(wb, makeSheet(["Rango Etario","Usuarios Activos"], aRows), "Edad");
+    const iRows = state._demoData.interests.map(r => [r.brandingInterest, r.activeUsers]);
+    XLSX.utils.book_append_sheet(wb, makeSheet(["Interés","Usuarios Activos"], iRows), "Intereses");
+  }
+
+  XLSX.writeFile(wb, `carrefour-retail-media-${date}.xlsx`);
+}
+
 // ── TAB 2: SKU metrics ────────────────────────────────────────────────────────
 let acTimer = null;
 
@@ -1721,7 +1979,7 @@ function refreshAll() {
   const btn = el("refreshBtn");
   btn.style.animation = "spin .5s linear infinite";
   btn.style.opacity = ".5";
-  const tasks = [loadOverview(), loadCategoryViews()];
+  const tasks = [loadOverview(), loadCategoryViews(), loadDemographics()];
   if (state.eans.length && el("skuTableWrap").style.display !== "none") {
     tasks.push(runSkuReport()); // runSkuReport ya llama a loadSkuSourceMedium al terminar
   }
@@ -1742,6 +2000,7 @@ initTabs();
 initEanAutocomplete();
 loadOverview();
 loadCategoryViews();
+loadDemographics();
 </script>
 
 </body>
