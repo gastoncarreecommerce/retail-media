@@ -843,7 +843,7 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
 
 <script>
 (function(){
-  const PWD  = "RetailMedia1234";
+  // Lau buscate un problema honesto
   const KEY  = "rm_auth";
   const UKEY = "rm_user";
 
@@ -852,21 +852,41 @@ tbody td.muted { color: var(--ink2); font-size: 12px; font-family: "SF Mono", "F
     document.getElementById("dashboard").style.display = "block";
   }
   function fail(msg) {
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = false;
+    btn.textContent = "Ingresar →";
     const errEl = document.getElementById("loginError");
     errEl.textContent = msg;
     errEl.style.display = "block";
     document.getElementById("loginPass").value = "";
     document.getElementById("loginPass").focus();
   }
-  function attempt() {
+  async function attempt() {
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value;
-    if (pass === PWD) {
-      sessionStorage.setItem(KEY, "1");
-      if (user) sessionStorage.setItem(UKEY, user);
-      unlock();
-    } else {
-      fail("Contraseña incorrecta. Verificá tus datos e intentá de nuevo.");
+    if (!pass) return;
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.textContent = "Verificando…";
+    document.getElementById("loginError").style.display = "none";
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pass }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem(KEY, "1");
+        if (user) sessionStorage.setItem(UKEY, user);
+        unlock();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        fail(data.detail || "Contraseña incorrecta. Verificá tus datos e intentá de nuevo.");
+      }
+    } catch {
+      fail("Error de conexión. Verificá tu acceso a la red corporativa.");
     }
   }
 
