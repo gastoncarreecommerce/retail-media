@@ -1496,15 +1496,14 @@ tbody td.muted {
         </div>
       </div>
 
-      <!-- Health card -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <div class="card-title">Salud técnica</div>
-          <div class="card-sub">Errores y warnings por módulo de log</div>
-        </div>
-        <div class="table-wrap">
-          <table><thead><tr><th>Módulo</th><th style="text-align:right">Errores</th></tr></thead>
-          <tbody id="atd-errores-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table>
+      <!-- Contact note -->
+      <div class="card section-gap" style="border-left:3px solid var(--blue)">
+        <div class="card-body" style="padding:18px 20px;display:flex;align-items:center;gap:14px">
+          <div style="font-size:22px;flex-shrink:0">📬</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">¿Consultas sobre Atenti?</div>
+            <div style="font-size:13px;color:var(--ink2)">Escribile a <a href="mailto:gaston_ruiz@carrefour.com" style="color:var(--blue);font-weight:600">gaston_ruiz@carrefour.com</a></div>
+          </div>
         </div>
       </div>
 
@@ -2484,18 +2483,6 @@ loadDemographics();
     el("atd-productos-body").innerHTML     = tableRows(data.agregar.top_productos, "Sin datos");
     el("atd-categorias-body").innerHTML    = tableRows(data.agregar.top_categorias, "Sin datos");
 
-    const errModules = [
-      ["chat", data.chat.errores],
-      ["categorizar", data.categorizar.errores],
-      ["buscar_eans", data.buscar_eans.errores],
-      ["agregar", data.agregar.errores],
-      ["buscar_similares", data.buscar_similares.errores],
-      ["login", data.login.errores],
-    ];
-    el("atd-errores-body").innerHTML = errModules.map(([mod, n]) =>
-      `<tr><td style="font-family:monospace;font-size:12px">${mod}</td><td style="text-align:right;color:${n > 0 ? "var(--red)" : "var(--green)"}">
-        ${n > 0 ? "⚠ " : ""}${n}</td></tr>`
-    ).join("");
 
     // Hourly bar chart
     const porHora = data.chat.por_hora || [];
