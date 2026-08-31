@@ -886,6 +886,23 @@ tbody td.muted {
   .topbar { padding: 0 14px; }
   .main-content { padding: 14px; }
 }
+
+/* ── Atenti tab ─────────────────────────────────────── */
+.atenti-label {
+  font-size: 10.5px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;
+}
+.atd-badge {
+  padding: 7px 14px; border-radius: 100px;
+  background: var(--vtex-subtle); color: var(--vtex);
+  border: 1px solid color-mix(in srgb, var(--vtex) 20%, transparent);
+  font-size: 12px; font-weight: 600; white-space: nowrap; align-self: flex-end;
+}
+.kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1200px) { .kpi-grid-3 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px)  { .kpi-grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px)  { .kpi-grid-3 { grid-template-columns: 1fr; } }
+.atd-empty-row { text-align: center; color: var(--muted); padding: 20px 18px !important; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -1053,6 +1070,10 @@ tbody td.muted {
       <button class="tab-btn" data-tab="tab2">
         <span class="nav-icon">🔍</span>
         <span>SKUs / EANs</span>
+      </button>
+      <button class="tab-btn" data-tab="tab3">
+        <span class="nav-icon">🤖</span>
+        <span>Atenti</span>
       </button>
     </nav>
 
@@ -1318,6 +1339,183 @@ tbody td.muted {
       </div>
 
     </div>
+
+    <!-- ═══════════════════════════════════════════
+         TAB 3: Atenti — Chat de IA
+    ════════════════════════════════════════════ -->
+    <div id="tab3" class="tab-panel">
+
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="section-title">Atenti — Chat de IA</div>
+          <div class="section-sub">Métricas agregadas del asistente de compras · sin datos personales</div>
+        </div>
+        <div class="page-header-right" style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">
+          <div>
+            <div class="atenti-label">Desde</div>
+            <input type="date" id="atd-from" class="date-input" style="width:148px">
+          </div>
+          <div>
+            <div class="atenti-label">Hasta</div>
+            <input type="date" id="atd-to" class="date-input" style="width:148px">
+          </div>
+          <div id="atd-badge" class="atd-badge" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="kpi-grid kpi-grid-3 section-gap" id="atd-kpi-row">
+        <div class="kpi-card" style="--kpi-color:var(--blue)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">💬</div></div>
+          <div class="kpi-label">Conversaciones</div>
+          <div class="kpi-value" id="atd-llamadas">—</div>
+          <div class="kpi-sub" id="atd-usuarios"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--purple)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">📦</div></div>
+          <div class="kpi-label">Con productos identificados</div>
+          <div class="kpi-value" id="atd-productos">—</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--teal)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">💡</div></div>
+          <div class="kpi-label">Con sugerencia mostrada</div>
+          <div class="kpi-value" id="atd-sugerencia">—</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--green)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">🛒</div></div>
+          <div class="kpi-label">Carritos agregados</div>
+          <div class="kpi-value" id="atd-carritos">—</div>
+          <div class="kpi-sub" id="atd-valor"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--amber)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">🏷</div></div>
+          <div class="kpi-label">Ticket promedio</div>
+          <div class="kpi-value" id="atd-ticket">—</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--red)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">⚠️</div></div>
+          <div class="kpi-label">Búsquedas EAN sin resultado</div>
+          <div class="kpi-value" id="atd-sinresultado">—</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--vtex)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">👤</div></div>
+          <div class="kpi-label">Usuarios logueados (únicos)</div>
+          <div class="kpi-value" id="atd-login">—</div>
+          <div class="kpi-sub" id="atd-carrito-login"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--green)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">💸</div></div>
+          <div class="kpi-label">Descuento total aplicado</div>
+          <div class="kpi-value" id="atd-descuento">—</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--blue)">
+          <div class="kpi-top"><div class="kpi-icon" style="font-size:18px">⚡</div></div>
+          <div class="kpi-label">% Entrega inmediata</div>
+          <div class="kpi-value" id="atd-inmediato">—</div>
+        </div>
+      </div>
+
+      <!-- Hourly chart -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Conversaciones por hora del día</div>
+            <div class="card-sub">Horario de mayor uso del asistente</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="atd-horas-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tables row 1 -->
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top recetas / búsquedas</div>
+            <div class="card-sub">Consultas más frecuentes al asistente</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Receta / consulta</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-recetas-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top ingredientes</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-ingredientes-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- Tables row 2 -->
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top términos buscados (EAN)</div>
+            <div class="card-sub">Qué escribió la gente para buscar productos</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Término</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-terminos-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top marcas en "productos similares"</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Marca</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-marcas-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- Tables row 3 -->
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top subcategorías buscadas (EAN)</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Subcategoría</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-subcategorias-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top categorías en "productos similares"</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Categoría</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-cat-similares-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- Tables row 4 -->
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top productos agregados al carrito</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Producto</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-productos-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top categorías agregadas al carrito</div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Categoría</th><th style="text-align:right">Veces</th></tr></thead><tbody id="atd-categorias-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- Health card -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <div class="card-title">Salud técnica</div>
+          <div class="card-sub">Errores y warnings por módulo de log</div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Módulo</th><th style="text-align:right">Errores</th></tr></thead>
+          <tbody id="atd-errores-body"><tr><td colspan="2" class="atd-empty-row">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="atd-empty" style="display:none">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p>Todavía no hay datos de Atenti para el rango seleccionado.</p>
+      </div>
+
+    </div>
+
   </main>
 </div><!-- /shell -->
 </div><!-- /dashboard -->
@@ -2151,6 +2349,227 @@ initEanAutocomplete();
 loadOverview();
 loadCategoryViews();
 loadDemographics();
+
+// ── ATENTI ────────────────────────────────────────────────────────────────────
+(function() {
+  const DATA_BASE = "https://raw.githubusercontent.com/gastoncarreecommerce/vtex-utm-audit/main/docs/data/atenti";
+  let atdChart = null;
+
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr + "T00:00:00Z");
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+  function todayAR() {
+    const d = new Date(Date.now() - 3 * 3600 * 1000);
+    return d.toISOString().slice(0, 10);
+  }
+  function fmtFechaAR(dateStr) {
+    return new Date(dateStr + "T00:00:00Z")
+      .toLocaleDateString("es-AR", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+
+  async function fetchDay(date) {
+    try {
+      const r = await fetch(`${DATA_BASE}/${date}.json`, { cache: "no-store" });
+      return r.ok ? await r.json() : null;
+    } catch { return null; }
+  }
+
+  function sum(days, path) {
+    return days.reduce((s, d) => {
+      const v = path.split(".").reduce((o, k) => o && o[k], d);
+      return s + (Number(v) || 0);
+    }, 0);
+  }
+  function avg(arr) { return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0; }
+  function mergeTop(days, path, n) {
+    const m = {};
+    days.forEach(d => {
+      const arr = path.split(".").reduce((o, k) => o && o[k], d) || [];
+      arr.forEach(x => { m[x.key] = (m[x.key] || 0) + x.count; });
+    });
+    return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n).map(([key, count]) => ({ key, count }));
+  }
+  function merge(days) {
+    if (days.length === 1) return days[0];
+    const porHora = Array(24).fill(0);
+    days.forEach(d => (d.chat.por_hora || []).forEach((v, i) => { porHora[i] += v; }));
+    const agTot = sum(days, "agregar.total_agregados"), agVal = sum(days, "agregar.valor_total");
+    return {
+      date: days[0].date,
+      chat: {
+        llamadas: sum(days, "chat.llamadas"),
+        usuarios_unicos: sum(days, "chat.usuarios_unicos"),
+        con_productos_identificados: sum(days, "chat.con_productos_identificados"),
+        con_sugerencia: sum(days, "chat.con_sugerencia"),
+        por_hora: porHora,
+        errores: sum(days, "chat.errores"),
+      },
+      categorizar: {
+        top_recetas: mergeTop(days, "categorizar.top_recetas", 10),
+        top_ingredientes: mergeTop(days, "categorizar.top_ingredientes", 15),
+        errores: sum(days, "categorizar.errores"),
+      },
+      buscar_eans: {
+        sin_resultado: sum(days, "buscar_eans.sin_resultado"),
+        top_terminos: mergeTop(days, "buscar_eans.top_terminos", 15),
+        top_subcategorias: mergeTop(days, "buscar_eans.top_subcategorias", 10),
+        errores: sum(days, "buscar_eans.errores"),
+      },
+      agregar: {
+        total_agregados: agTot,
+        valor_total: agVal,
+        ticket_promedio: agTot ? agVal / agTot : 0,
+        descuento_total: sum(days, "agregar.descuento_total"),
+        canal: { inmediato: sum(days, "agregar.canal.inmediato"), programado: sum(days, "agregar.canal.programado") },
+        top_productos: mergeTop(days, "agregar.top_productos", 10),
+        top_categorias: mergeTop(days, "agregar.top_categorias", 10),
+        errores: sum(days, "agregar.errores"),
+      },
+      buscar_similares: {
+        top_marcas: mergeTop(days, "buscar_similares.top_marcas", 10),
+        top_categorias: mergeTop(days, "buscar_similares.top_categorias", 10),
+        errores: sum(days, "buscar_similares.errores"),
+      },
+      login: {
+        usuarios_unicos: sum(days, "login.usuarios_unicos"),
+        carrito_promedio: avg(days.map(d => d.login?.carrito_promedio || 0)),
+        pct_con_carrito: avg(days.map(d => d.login?.pct_con_carrito || 0)),
+        errores: sum(days, "login.errores"),
+      },
+    };
+  }
+
+  function tableRows(arr, empty) {
+    if (arr && arr.length)
+      return arr.map(x =>
+        `<tr><td>${escapeHtml(x.key)}</td><td style="text-align:right;font-variant-numeric:tabular-nums">${x.count.toLocaleString("es-AR")}</td></tr>`
+      ).join("");
+    return `<tr><td colspan="2" class="atd-empty-row">${empty}</td></tr>`;
+  }
+
+  function renderAtendi(data, dias) {
+    const fmtARS = n => "$ " + Math.round(n).toLocaleString("es-AR");
+
+    el("atd-llamadas").textContent    = data.chat.llamadas.toLocaleString("es-AR");
+    el("atd-usuarios").textContent    = data.chat.usuarios_unicos.toLocaleString("es-AR") + " usuarios únicos";
+    el("atd-productos").textContent   = data.chat.con_productos_identificados.toLocaleString("es-AR");
+    el("atd-sugerencia").textContent  = data.chat.con_sugerencia.toLocaleString("es-AR");
+    el("atd-carritos").textContent    = data.agregar.total_agregados.toLocaleString("es-AR");
+    el("atd-valor").textContent       = fmtARS(data.agregar.valor_total) + " total";
+    el("atd-ticket").textContent      = fmtARS(data.agregar.ticket_promedio || 0);
+    el("atd-sinresultado").textContent = data.buscar_eans.sin_resultado.toLocaleString("es-AR");
+    el("atd-login").textContent       = data.login.usuarios_unicos.toLocaleString("es-AR");
+    el("atd-carrito-login").textContent = data.login.carrito_promedio != null
+      ? fmtARS(data.login.carrito_promedio) + " promedio · " + (data.login.pct_con_carrito || 0).toFixed(1) + "% con carrito" : "";
+    el("atd-descuento").textContent   = data.agregar.descuento_total != null ? fmtARS(data.agregar.descuento_total) : "—";
+    const canal = data.agregar.canal, cTot = canal ? canal.inmediato + canal.programado : 0;
+    el("atd-inmediato").textContent   = cTot ? (canal.inmediato / cTot * 100).toFixed(1) + "%" : "—";
+
+    // Badge
+    const badge = el("atd-badge");
+    badge.style.display = "";
+    badge.textContent = dias.length > 1
+      ? `📅 ${dias.length} días · ${fmtFechaAR(dias[0].date)} → ${fmtFechaAR(dias[dias.length - 1].date)}`
+      : `📅 ${fmtFechaAR(data.date)}`;
+
+    // Tables
+    el("atd-recetas-body").innerHTML       = tableRows(data.categorizar.top_recetas, "Sin datos");
+    el("atd-ingredientes-body").innerHTML  = tableRows(data.categorizar.top_ingredientes, "Sin datos");
+    el("atd-terminos-body").innerHTML      = tableRows(data.buscar_eans.top_terminos, "Sin datos");
+    el("atd-marcas-body").innerHTML        = tableRows(data.buscar_similares.top_marcas, "Sin datos");
+    el("atd-subcategorias-body").innerHTML = tableRows(data.buscar_eans.top_subcategorias, "Sin datos");
+    el("atd-cat-similares-body").innerHTML = tableRows(data.buscar_similares.top_categorias, "Sin datos");
+    el("atd-productos-body").innerHTML     = tableRows(data.agregar.top_productos, "Sin datos");
+    el("atd-categorias-body").innerHTML    = tableRows(data.agregar.top_categorias, "Sin datos");
+
+    const errModules = [
+      ["chat", data.chat.errores],
+      ["categorizar", data.categorizar.errores],
+      ["buscar_eans", data.buscar_eans.errores],
+      ["agregar", data.agregar.errores],
+      ["buscar_similares", data.buscar_similares.errores],
+      ["login", data.login.errores],
+    ];
+    el("atd-errores-body").innerHTML = errModules.map(([mod, n]) =>
+      `<tr><td style="font-family:monospace;font-size:12px">${mod}</td><td style="text-align:right;color:${n > 0 ? "var(--red)" : "var(--green)"}">
+        ${n > 0 ? "⚠ " : ""}${n}</td></tr>`
+    ).join("");
+
+    // Hourly bar chart
+    const porHora = data.chat.por_hora || [];
+    const maxHora = Math.max(...porHora, 0);
+    const accent = cssVar("--blue");
+    const accentDim = `rgba(54,148,255,.22)`;
+    if (atdChart) atdChart.destroy();
+    atdChart = new Chart(el("atd-horas-chart").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: porHora.map((_, h) => `${h}h`),
+        datasets: [{
+          label: "Conversaciones",
+          data: porHora,
+          backgroundColor: porHora.map(n => n === maxHora && maxHora > 0 ? accent : accentDim),
+          borderRadius: 5,
+          maxBarThickness: 28,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.raw} conversaciones` } },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: cssVar("--muted"), font: { size: 10, family: "Inter, sans-serif" } },
+            border: { color: cssVar("--grid") },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: cssVar("--grid") },
+            ticks: { color: cssVar("--muted"), font: { size: 10 }, precision: 0 },
+            border: { color: "transparent" },
+          },
+        },
+      },
+    });
+  }
+
+  async function loadAtenti() {
+    el("atd-empty").style.display = "none";
+    el("atd-kpi-row").style.opacity = ".4";
+
+    const fromEl = el("atd-from"), toEl = el("atd-to");
+    let data, dias;
+
+    if (fromEl.value && toEl.value) {
+      const dates = [];
+      let d = fromEl.value;
+      while (d <= toEl.value && dates.length < 31) { dates.push(d); d = addDays(d, 1); }
+      const results = await Promise.all(dates.map(fetchDay));
+      dias = results.filter(Boolean);
+      if (!dias.length) { el("atd-empty").style.display = ""; el("atd-kpi-row").style.opacity = ""; return; }
+      data = merge(dias);
+    } else {
+      let dd = addDays(todayAR(), -1);
+      for (let i = 0; i < 7 && !data; i++) { data = await fetchDay(dd); if (!data) dd = addDays(dd, -1); }
+      if (!data) { el("atd-empty").style.display = ""; el("atd-kpi-row").style.opacity = ""; return; }
+      if (!fromEl.value) fromEl.value = data.date;
+      if (!toEl.value) toEl.value = data.date;
+      dias = [data];
+    }
+
+    el("atd-kpi-row").style.opacity = "";
+    renderAtendi(data, dias);
+  }
+
+  el("atd-from").addEventListener("change", loadAtenti);
+  el("atd-to").addEventListener("change", loadAtenti);
+  loadAtenti();
+})();
 </script>
 
 </body>
